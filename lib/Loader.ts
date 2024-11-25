@@ -33,6 +33,7 @@ class Loader {
             });
         }
         return  new Promise<ArrayBuffer>((resolve,reject)=>{
+            if(false) resolve(new ArrayBuffer(1));
             reject("dicom source is not valid")
         });
         

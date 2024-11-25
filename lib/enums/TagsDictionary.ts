@@ -3617,3 +3617,4 @@ const TagsDictionaryEnums:TagsDictionaryEnumsType = {
 };
 
 export default TagsDictionaryEnums;
+export type { TagsDictionaryEnumsType };

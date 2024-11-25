@@ -1,0 +1,27 @@
+{
+    "name": "@abasb75/abasb75",
+    "version": "0.0.0-test",
+    "description": "a powerfull dicom parser",
+    "main": "index.js",
+    "type": "module",
+    "types": "index.d.ts",
+    "keywords": [
+      "dicom",
+      "dcm",
+      "dcmjs",
+      "dicom-parser",
+      "pacs"
+    ],
+    "author": "Abbas Bagheri <abasbagheria@gmail.com>",
+    "license": "ISC",
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/abasb75//raction.git"
+    },
+      "bugs": {
+      "url": "https://github.com/abasb75/abasb75/issues"
+    },
+      "homepage": "https://github.com/abasb75/abasb75#readme"
+      
+  }
+  

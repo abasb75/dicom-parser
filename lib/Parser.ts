@@ -19,7 +19,7 @@ class Parser {
     private littleEndian:boolean=true;
     private implicit:boolean=false;
     private transferSyntaxUID:string = "";
-    private UNDEFIENED_LEN:number = 0xffffffff;
+    // private UNDEFIENED_LEN:number = 0xffffffff;
     private inflated:boolean = false;
 
     constructor(arrayBuffer:ArrayBuffer){

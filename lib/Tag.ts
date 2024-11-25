@@ -51,9 +51,9 @@ class Tag {
         if(typeof element === "number"){
             _element = Tag.intTo4digitString(element);
         }
-        const groupItems = TagsDictionaryEnums[group];
+        const groupItems = TagsDictionaryEnums[_group || group];
         if(!groupItems) return "";
-        const elementItem = groupItems[element];
+        const elementItem = groupItems[_element || element];
         if(!elementItem) return "";
 
         return elementItem[0];
