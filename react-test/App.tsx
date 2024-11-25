@@ -2,7 +2,8 @@
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 //@ts-ignore
 import ReactJson from 'react-json-view'
-import { loadAndParseFromFiles, loadAndParseFromUrl } from '@lib/index';
+import { loadAndParseFromFiles, loadAndParseFromUrl } from '@abasb75/dicom-parser';
+import Dataset from '@abasb75/dicom-parser/Dataset';
 
 function App() {
 
@@ -54,6 +55,9 @@ function App() {
 
   useEffect(()=>{
     console.log("dcm dataset",dcmData);
+    if(dcmData instanceof Dataset){
+      console.log('parsed',dcmData.get(0x0010,0x0040));
+    }
   },[dcmData]);
 
 
@@ -106,7 +110,7 @@ function App() {
       </div>
     </>
   );
-  
+
 }
 
 export default App
