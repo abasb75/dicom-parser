@@ -43,6 +43,7 @@ function App() {
     if (event.target.files && event.target.files[0]) {
       loadAndParseFromFiles(event.target.files[0]).then(dataset=>{
         setDcmData(dataset);
+        setErrorMessage("");
       }).catch(err=>{
         if(typeof err === "string"){
           setErrorMessage(err);
@@ -104,7 +105,8 @@ function App() {
         </div>
       </div>
     </>
-  )
+  );
+  
 }
 
 export default App

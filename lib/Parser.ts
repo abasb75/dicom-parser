@@ -2,7 +2,7 @@ import Dataset from "./Dataset";
 import Tag from "./Tag";
 import Value from "./Value";
 import { Tags } from "./types";
-import pako from "pako";
+import * as pako from "pako";
 
 class Parser {
 
@@ -48,7 +48,7 @@ class Parser {
 
     parse(){
         this.getNextTag();
-        this.dataSet = new Dataset(this.tags,this.arrayBuffer);
+        this.dataSet = new Dataset(this.tags,this.dataView,this.littleEndian);
         console.log(this.dataSet)
         this.dataSet.transferSyntaxUID = this.transferSyntaxUID;
         return this.dataSet;

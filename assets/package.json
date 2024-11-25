@@ -1,5 +1,5 @@
 {
-    "name": "@abasb75/abasb75",
+    "name": "@abasb75/dicom-parser",
     "version": "0.0.0-test",
     "description": "a powerfull dicom parser",
     "main": "index.js",
@@ -16,12 +16,12 @@
     "license": "ISC",
     "repository": {
       "type": "git",
-      "url": "git+https://github.com/abasb75//raction.git"
+      "url": "git+https://github.com/abasb75/dicom-parser/raction.git"
     },
       "bugs": {
-      "url": "https://github.com/abasb75/abasb75/issues"
+      "url": "https://github.com/abasb75/dicom-parser/issues"
     },
-      "homepage": "https://github.com/abasb75/abasb75#readme"
+      "homepage": "https://github.com/abasb75/dicom-parser#readme"
       
   }
   
