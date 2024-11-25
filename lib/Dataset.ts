@@ -1,6 +1,6 @@
 import Tag from "./Tag";
 import Value from "./Value";
-import { Tags } from "./types";
+import { DicomDate, DicomTime, Tags } from "./types";
 
 class Dataset {
     tags:Tags;
@@ -13,8 +13,8 @@ class Dataset {
     windowCenter:number|string|undefined;
     seriesInstanceUID:string;	
     seriesNumber:number|string|undefined;
-    studyDate:string;
-    studyTime:number|string|undefined;
+    studyDate:string|DicomDate;
+    studyTime:number|DicomTime|string|undefined;
     pixelRepresentation:number|string|undefined;
     littleEndian:boolean;
     pixeSpacing:number|number[]|string|undefined;
@@ -38,8 +38,8 @@ class Dataset {
         this.windowCenter = this.get(0x0028,0x1051);
         this.seriesInstanceUID = this.get(0x0020,0x000E);
         this.seriesNumber = this.get(0x0020,0x0011);
-        this.studyDate = this.get(0x0008,0x0020);
-        this.studyTime = this.get(0x0008,0x0030);
+        this.studyDate = this.date(0x0008,0x0020);
+        this.studyTime = this.time(0x0008,0x0030);
         this.pixelRepresentation = this.get(0x0028,0x0103);
         this.pixeSpacing = this.get(0x0028,0x0030);
         this.accessionNumber = this.string(0x0008,0x0050);
@@ -51,6 +51,38 @@ class Dataset {
         this.rows = this.get(0x0028,0x0010);
         this.columns = this.get(0x0028,0x0011);
         this.patientAge = this.get(0x0010,0x1010);
+    }
+
+    date(group:number,element:number){
+        const dateValue = this.get(group,element);
+        
+        if(/^[0-9]{4}\-[0-9]{2}\-[0-9]{2}$/.exec(dateValue)){
+            console.log('dateValue1',dateValue);
+            const dateVaues = dateValue.split('-');
+            return {
+                year:dateVaues[0],
+                month:dateVaues[1],
+                day:dateVaues[2],
+            };
+        }
+        console.log('dateValue',dateValue);
+        return dateValue;
+    }
+
+    time(group:number,element:number){
+        const dateValue = this.get(group,element);
+        
+        if(/^[0-9]{2}\:[0-9]{2}\:[0-9]{2}$/.exec(dateValue)){
+            console.log('dateValue1',dateValue);
+            const dateVaues = dateValue.split(':');
+            return {
+                hour:dateVaues[0],
+                minute:dateVaues[1],
+                second:dateVaues[2],
+            };
+        }
+        console.log('dateValue',dateValue);
+        return dateValue;
     }
 
     int(group:number,element:number):number|undefined{
