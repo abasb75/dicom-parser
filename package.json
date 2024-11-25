@@ -8,9 +8,10 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "package":"tsc --project ./lib/tsconfig.json & cp ./assets/package.json ./package/ & cp ./README.md ./package/"
+    "package": "tsc --project ./lib/tsconfig.json & cp ./assets/package.json ./package/ & cp ./README.md ./package/"
   },
   "dependencies": {
+    "@abasb75/dicom-parser": "^0.0.3-test",
     "i": "^0.3.7",
     "npm": "^10.9.1",
     "pako": "^2.1.0",
@@ -21,9 +22,9 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
-    "@types/pako": "^2.0.3",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
+    "@types/pako": "^2.0.3",
     "@vitejs/plugin-react": "^4.3.3",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.13.0",

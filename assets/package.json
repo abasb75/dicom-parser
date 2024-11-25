@@ -1,27 +1,35 @@
 {
     "name": "@abasb75/dicom-parser",
-    "version": "0.0.0-test",
-    "description": "a powerfull dicom parser",
+    "version": "0.0.3-test",
+    "description": "a javascript powerfull dicom parser",
     "main": "index.js",
     "type": "module",
     "types": "index.d.ts",
     "keywords": [
-      "dicom",
-      "dcm",
-      "dcmjs",
-      "dicom-parser",
-      "pacs"
+        "dicom",
+        "dcm",
+        "dcmjs",
+        "dicom-parser",
+        "pacs"
     ],
     "author": "Abbas Bagheri <abasbagheria@gmail.com>",
     "license": "ISC",
     "repository": {
-      "type": "git",
-      "url": "git+https://github.com/abasb75/dicom-parser/raction.git"
+        "type": "git",
+        "url": "git+https://github.com/abasb75/dicom-parser/raction.git"
     },
-      "bugs": {
-      "url": "https://github.com/abasb75/dicom-parser/issues"
+    "bugs": {
+        "url": "https://github.com/abasb75/dicom-parser/issues"
     },
-      "homepage": "https://github.com/abasb75/dicom-parser#readme"
-      
-  }
-  
+    "homepage": "https://github.com/abasb75/dicom-parser#readme",
+    "dependencies": {
+        "pako": "^2.1.0"
+    },
+    "peerDependencies": {
+        "pako": "^2.1.0"
+    },
+    "devDependencies": {
+        "pako": "^2.1.0",
+        "@types/pako": "^2.0.3"
+    }
+}

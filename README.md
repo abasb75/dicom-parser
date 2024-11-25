@@ -1,7 +1,8 @@
 # @abasb75/dicom-parser
 
 ```sh
-npm i @abasb75/dicom-parser --save
+npm i @abasb75/dicom-parser pako --save
+npm i @types/pako --save-dev
 ```
 
 
