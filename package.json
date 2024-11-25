@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "package": "tsc --project ./lib/tsconfig.json & cp ./assets/package.json ./package/ & cp ./README.md ./package/"
+    "package": "tsc --project ./lib/tsconfig.json & cp ./assets/package.json ./package/ & cp ./README.md ./package/",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@abasb75/dicom-parser": "^0.0.4-test",

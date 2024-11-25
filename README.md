@@ -5,8 +5,11 @@ npm i @abasb75/dicom-parser pako --save
 npm i @types/pako --save-dev
 ```
 
+# Demo
 
-#Usage
+<a href="https://abasb75.github.io/dicom-parser/">demo link</a>
+
+# Usage
 
 1. For Download dicom and parse from url:
 
