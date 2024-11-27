@@ -1,6 +1,6 @@
 {
     "name": "@abasb75/dicom-parser",
-    "version": "0.0.3-test",
+    "version": "0.0.5-test",
     "description": "a javascript powerfull dicom parser",
     "main": "index.js",
     "type": "module",

@@ -11,7 +11,7 @@ class Parser {
     private dataView:DataView;
     private tags:Tags = {};
     private dataSet:Dataset|undefined;
-    private EXEPTED = ["OB", "OW", "SQ", "UN"];
+    private EXEPTED = ["OB", "OW", "SQ", "UN","UT"];
     private VRS = ["AE", "AS", "AT", "CS", "DA", "DS", "DT", "FL", "FD", "IS", "LO", "LT", "OB", "OD", "OF", "OW", "PN", "SH", "SL", "SS", "ST", "TM", "UI", "UL", "UN", "US", "UT", "UC"];
     private IMPLICT_TRANSFER_SYNTAXES = ["1.2.840.10008.1.2"];
     private BIG_ENDIAN_TRANSFER_SYNTAXES = ["1.2.840.10008.1.2.2"];
@@ -47,7 +47,7 @@ class Parser {
 
 
     parse(){
-        this.getNextTag();
+        this.getNextElement();
         this.dataSet = new Dataset(this.tags,this.dataView,this.littleEndian);
         console.log(this.dataSet)
         this.dataSet.transferSyntaxUID = this.transferSyntaxUID;
@@ -58,7 +58,7 @@ class Parser {
         return this.dataSet;
     }
 
-    getNextTag():void{
+    getNextElement():void{
 
         if(this.offset >= this.arrayBuffer.byteLength){
             return;
@@ -72,7 +72,7 @@ class Parser {
 
         if(group === 0xFFFE && (element === 0xE0DD  || element === 0xE00D || element === 0xE000)){
             this.offset += 4;
-            return this.getNextTag();
+            return this.getNextElement();
         }
 
         if(!this.implicit && group!==0x0002 && this.IMPLICT_TRANSFER_SYNTAXES.includes(this.transferSyntaxUID)){
@@ -91,7 +91,7 @@ class Parser {
             this.arrayBuffer = this.concatArrayBuffers(meta,infaltedBody);
             this.dataView = new DataView(this.arrayBuffer);
             this.inflated = true;
-            return this.getNextTag();
+            return this.getNextElement();
         }
 
         const vr = this.getNextVR(group,element);
@@ -114,14 +114,12 @@ class Parser {
             this.offset = 132;
             this.tags = {};
             this.implicit = true;
-            return this.getNextTag();
+            return this.getNextElement();
         }else{
-            console.log("ended",vr)
             return;
         }
 
         if(group===0x0002 && element===0x0010){
-            console.log("transfer syntax uid",this.transferSyntaxUID);
             this.transferSyntaxUID = (Value.getString(new Uint8Array(this.arrayBuffer,this.offset,len))).replace('\0', '');
         }
 
@@ -130,11 +128,30 @@ class Parser {
         this.tags[key] = tag;
         
 
-        if(vr === "SQ"){
-            this.getNextTag();
+        if(len === 0xFFFFFFFF && group === 0x7FE0 && element === 0x0010){
+            let {group,element} = this.getNextGroupAndElement();
+            while(true){
+                if(group === 0xFFFE && element === 0xE000){
+                    const len = this.dataView.getUint32(this.offset,this.littleEndian);
+                    this.offset +=4;
+                    const t = this.getNextGroupAndElement();
+                    group = t.group;
+                    element = t.element;
+                    this.offset += len;
+                }else{
+                    break;
+                }
+            }
+            this.offset -= 4;
+            
+        }
+        
+
+        if(vr === "SQ" ){
+            this.getNextElement();
         }else{
             this.offset += len;
-            this.getNextTag();
+            this.getNextElement();
         }
         
 
@@ -159,6 +176,9 @@ class Parser {
     }
 
     getNextVR(groupInt:number,elementInt:number){
+        if(this.offset >= this.dataView.byteLength){
+            return "";
+        }
         if(this.implicit){
             return Tag.getTagVRFromDictionary(groupInt,elementInt) || "AA";
         }

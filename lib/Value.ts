@@ -14,6 +14,11 @@ class Value{
                 return Value.DA(dataView,offset,len);
             case "TM":
                 return Value.TM(dataView,offset,len);
+            case "OW":
+            case "OB":
+            case "OD":
+            case "OF":
+                return Value.OW(dataView,offset,len);
             case "UI":
             case "SH":
             case "LO":
@@ -55,9 +60,9 @@ class Value{
     static DS(dataView:DataView,offset:number,len:number){
         let value = Value.getString(new Uint8Array(dataView.buffer,offset,len));
         const values = value.split("\\").map(v=>{
-            if(/^[0-9]+$/.exec(v)){
+            if(/^[0-9\-\+]+$/.exec(v)){
                 return parseInt(v);
-            }else if(/^[0-9]+\.[0-9]+$/.exec(v)){
+            }else if(/^[0-9\-\+]+\.[0-9]+$/.exec(v)){
                 return parseFloat(v);
             }
             return v;
@@ -85,17 +90,21 @@ class Value{
         return `${value.slice(0,2)}:${value.slice(2,4)}:${value.slice(4,6)}`;
     }
 
-    static getString(bytes:Uint8Array|Int8Array|ArrayBuffer){
-        const decoder = new TextDecoder();
-        return decoder.decode(bytes).trim();
-    }
-
     static US(dataView:DataView,offset:number,len:number,littleEndian:boolean=true){
         if(len === 2){
             return dataView.getUint16(offset,littleEndian);
         }
     }
 
+    static OW(dataView:DataView,offset:number,len:number){
+        const buffer = dataView.buffer.slice(offset,len);
+        return new DataView(buffer);
+    }
+
+    static getString(bytes:Uint8Array|Int8Array|ArrayBuffer){
+        const decoder = new TextDecoder();
+        return decoder.decode(bytes).trim();
+    }
     
 
 }

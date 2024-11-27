@@ -1,9 +1,11 @@
 
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, Suspense, useEffect, useRef, useState, useTransition } from 'react';
 //@ts-ignore
 import ReactJson from 'react-json-view'
 import { loadAndParseFromFiles, loadAndParseFromUrl } from '@lib/index';
-import Dataset from '@abasb75/dicom-parser/Dataset';
+import Dataset from '@lib/Dataset';
+import Draw from '@lib/Draw';
+import { PixelArray } from '@lib/types';
 
 function App() {
 
@@ -11,9 +13,11 @@ function App() {
   const [loading,setLoading] = useState(false);
   const [errorMessage,setErrorMessage] = useState('');
   const [inputHasText,setInputHasText] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   
   const parseInputUrl = ()=>{
     const url = inputRef.current?.value;
@@ -43,8 +47,11 @@ function App() {
     console.log('file',event);
     if (event.target.files && event.target.files[0]) {
       loadAndParseFromFiles(event.target.files[0]).then(dataset=>{
-        setDcmData(dataset);
         setErrorMessage("");
+        drawDcm(dataset);
+        startTransition(()=>{
+          setDcmData(dataset);
+        });
       }).catch(err=>{
         if(typeof err === "string"){
           setErrorMessage(err);
@@ -55,52 +62,63 @@ function App() {
 
   useEffect(()=>{
     console.log("dcm dataset",dcmData);
-    if(dcmData instanceof Dataset){
-      console.log('parsed',dcmData.get(0x0010,0x0040));
-    }
+    
   },[dcmData]);
+
+  const drawDcm = (dcmData:Dataset|{})=>{
+    if(dcmData instanceof Dataset && canvasRef.current){
+      dcmData.draw(canvasRef.current);
+    }
+  }
 
 
   return (
     <>
       <div className='w-full h-[100vh] bg-slate-950 flex items-center justify-center flex-col'>
-        <div className='w-full max-w-[768px] bg-white rounded border-slate-600 border-2 h-full max-h-[420px]'>
-          <div className='h-[50px] w-full bg-black flex'>
-              <input 
-                type='text' 
-                className='flex-1 h-full w-full bg-slate-700 text-gray-400 font-semibold px-4 '
-                placeholder='Paste Your Dicom Url ...'
-                ref={inputRef}
-                onChange={(e)=>setInputHasText( ()=>(e.target.value)!=='' )}
-              />
-              {inputHasText ? (<button 
-                className='bg-slate-800 text-white px-2'
-                onClick={parseInputUrl}
-              >
-                Parse Dicom
-              </button>) : (<>
-                <input 
-                  type='file' 
-                  ref={fileInputRef} 
-                  id="file-input" 
-                  accept='dcm' 
-                  className='hidden' 
-                  onChange={fileInputChange}
-                />
-                <label 
-                className='bg-slate-800 text-white px-2 leading-[50px] cursor-pointer'
-                htmlFor='file-input'
-                
-                >
-                  Use Local File
-                </label>
-
-              </>)}
+        <div className='w-full max-w-[768px] bg-white rounded border-slate-600 border-2 h-full max-h-[420px] flex flex-row'>
+          <div className='bg-black w-1/3 flex items-center justify-center'>
+            <canvas ref={canvasRef} className='max-w-full max-h-full' />
           </div>
-          <div className=' h-[calc(100%_-_50px)] bg-slate-50 overflow-auto relative'>
-            <ReactJson src={dcmData} style={{width:'100%',height:'100%'}} />
-            {loading && <div className='absolute top-0 left-0 opacity-50 z-50 bg-slate-800 w-full h-full flex items-center justify-center font-semibold text-gray-300'>Loading ...</div>}
-            {errorMessage && <div className='absolute top-0 left-0 opacity-50 z-50 bg-slate-800 w-full h-full flex items-center justify-center font-semibold text-red-300'>{errorMessage}</div>}
+          <div className='w-2/3'>
+            <div className='h-[50px] w-full bg-black flex'>
+                <input 
+                  type='text' 
+                  className='flex-1 h-full w-full bg-slate-700 text-gray-400 font-semibold px-4 '
+                  placeholder='Paste Your Dicom Url ...'
+                  ref={inputRef}
+                  onChange={(e)=>setInputHasText( ()=>(e.target.value)!=='' )}
+                />
+                {inputHasText ? (<button 
+                  className='bg-slate-800 text-white px-2'
+                  onClick={parseInputUrl}
+                >
+                  Parse Dicom
+                </button>) : (<>
+                  <input 
+                    type='file' 
+                    ref={fileInputRef} 
+                    id="file-input" 
+                    accept='dcm' 
+                    className='hidden' 
+                    onChange={fileInputChange}
+                  />
+                  <label 
+                  className='bg-slate-800 text-white px-2 leading-[50px] cursor-pointer'
+                  htmlFor='file-input'
+                  
+                  >
+                    Use Local File
+                  </label>
+
+                </>)}
+            </div>
+            <div className=' h-[calc(100%_-_50px)] bg-slate-50 overflow-auto relative'>
+              <Suspense fallback={<Loading />}>
+                <ReactJson src={dcmData} style={{width:'100%',height:'100%'}} />
+              </Suspense>
+              {(isPending || loading) && <Loading />}
+              {errorMessage && <div className='absolute top-0 left-0 opacity-50 z-50 bg-slate-800 w-full h-full flex items-center justify-center font-semibold text-red-300'>{errorMessage}</div>}
+            </div>
           </div>
         </div>
         <div className='text-center py-2'>
@@ -111,5 +129,7 @@ function App() {
   );
 
 }
+
+const Loading = ()=>(<div className='absolute top-0 left-0 opacity-50 z-50 bg-slate-800 w-full h-full flex items-center justify-center font-semibold text-gray-300'>Loading ...</div>);
 
 export default App

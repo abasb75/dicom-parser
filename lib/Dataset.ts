@@ -1,6 +1,8 @@
+import Draw from "./Draw";
+import PixelData from "./PixelData";
 import Tag from "./Tag";
 import Value from "./Value";
-import { DicomDate, DicomTime, Tags } from "./types";
+import { DicomDate, DicomPatientModule, DicomPixelModule, DicomTime, DicomVOILutModule, Tags, PixelArray } from "./types";
 
 class Dataset {
     tags:Tags;
@@ -8,9 +10,6 @@ class Dataset {
     dataView:DataView;
     studyInstanceUID:string = "";
     studyID:string= "";
-    numberOfFrames:number|undefined;
-    windowWidth:number|string|undefined;
-    windowCenter:number|string|undefined;
     seriesInstanceUID:string;	
     seriesNumber:number|string|undefined;
     studyDate:string|DicomDate;
@@ -20,37 +19,84 @@ class Dataset {
     pixeSpacing:number|number[]|string|undefined;
     accessionNumber:string;
     bitsAllocated:number|string|undefined;
+    bitsStored:number|string|undefined;
+    highBit:number|string|undefined;
     imageType:number|string|number[]|string[]|undefined;	
     modality:number|string|number[]|string[]|undefined;	
     seriesDescription:string
     rows:string|number|undefined;
     columns:string|number|undefined;
     patientSex:any;
-    patientAge:string;
+    /** modules */
+    voiLUTModule:DicomVOILutModule;
+    patientModule:DicomPatientModule;
+    pixelModule:DicomPixelModule;
     constructor(tags:Tags,dataView:DataView,littleEndian:boolean){
         this.tags = tags;
         this.dataView = dataView;
         this.littleEndian = littleEndian;
         this.studyID = this.get(0x0020,0x0010) as string;
         this.studyInstanceUID = this.string(0x0020,0x000D);
-        this.numberOfFrames = this.int(0x0028,0x0008);
-        this.windowWidth = this.get(0x0028,0x1050);
-        this.windowCenter = this.get(0x0028,0x1051);
         this.seriesInstanceUID = this.get(0x0020,0x000E);
         this.seriesNumber = this.get(0x0020,0x0011);
         this.studyDate = this.date(0x0008,0x0020);
         this.studyTime = this.time(0x0008,0x0030);
-        this.pixelRepresentation = this.get(0x0028,0x0103);
-        this.pixeSpacing = this.get(0x0028,0x0030);
         this.accessionNumber = this.string(0x0008,0x0050);
-        this.bitsAllocated = this.get(0x0028,0x0100);
         this.imageType = this.get(0x0008,0x0008);
         this.modality = this.get(0x0008,0x0060);
         this.seriesDescription = this.string(0x0008,0x103E);
         this.patientSex = this.get(0x0010,0x0040);
-        this.rows = this.get(0x0028,0x0010);
-        this.columns = this.get(0x0028,0x0011);
-        this.patientAge = this.get(0x0010,0x1010);
+        this.voiLUTModule = this.getVOILutModule();
+        this.patientModule = this.getPatientModule();
+        this.pixelModule = this.getPixelModule();
+    }
+
+    getPixelData(){
+        return PixelData.get(this);
+    }
+
+    getVOILutModule():DicomVOILutModule{
+        return {
+            voiLUTFunction:this.get(0x0028,0x1056),
+            windowWidth:this.int(0x0028,0x1050),
+            windowCenter:this.int(0x0028,0x1051),
+            voiLUTSequence:this.get(0x0028,0x3010),
+            lutDescriptor:this.get(0x0028,0x3002),
+            lutExplanation:this.get(0x0028,0x3003),
+            lutData:this.get(0x0028,0x3006),
+            windowCenterAndWidthExplanation:this.get(0x0028,0x1055),
+        }
+    }
+
+    getPatientModule():DicomPatientModule{
+        return {
+            patientName:this.get(0x0010,0x0010),
+            patientID:this.get(0x0010,0x0020),
+            typeofPatientID:this.get(0x0010,0x0022),
+            patientSex:this.get(0x0010,0x0040),
+            patientBirthDate:this.get(0x0010,0x0030),
+            patientAge:this.get(0x0010,0x1010),
+            patientSize:this.get(0x0010,0x1020),
+            otherPatientIDs:this.get(0x0010,0x1000),
+            otherPatientNames:this.get(0x0010,0x1001),
+            patientWeight:this.get(0x0010,0x1030),
+        }	
+
+    }
+
+    getPixelModule():DicomPixelModule{
+        return {
+            photometricInterpretation:this.get(0x0028,0x0004),
+            numberOfFrames:this.int(0x0028,0x0008),
+            pixelRepresentation : this.int(0x0028,0x0103),
+            pixeSpacing:this.get(0x0028,0x0030),
+            rows:this.int(0x0028,0x0010),
+            columns:this.int(0x0028,0x0011),
+            bitsAllocated:this.int(0x0028,0x0100),
+            highBit:this.int(0x0028,0x0102),
+            bitsStored:this.int(0x0028,0x0101),
+            samplesPerPixel:this.int(0x0028,0x0002)
+        }
     }
 
     date(group:number,element:number){
@@ -86,7 +132,7 @@ class Dataset {
     }
 
     int(group:number,element:number):number|undefined{
-        const is = this.getValue(group,element,"IS");
+        const is = this.get(group,element);
         if(typeof is === "number"){
             return is;
         }else{
@@ -152,6 +198,13 @@ class Dataset {
         return Tag.intTo4digitString(input);
     }
 
+    draw(canvas:HTMLCanvasElement){
+        const pixelDatas = this.getPixelData();
+        if(pixelDatas){
+            //@ts-ignore
+            Draw.draw(canvas,pixelDatas,this);
+        }
+    }
     
 }
 
