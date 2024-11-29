@@ -2,7 +2,7 @@ import Draw from "./Draw";
 import PixelData from "./PixelData";
 import Tag from "./Tag";
 import Value from "./Value";
-import { DicomDate, DicomPatientModule, DicomPixelModule, DicomTime, DicomVOILutModule, Tags, PixelArray } from "./types";
+import { DicomDate, DicomPatientModule, DicomPixelModule, DicomTime, DicomVOILutModule, Tags } from "./types";
 
 class Dataset {
     tags:Tags;
@@ -51,15 +51,15 @@ class Dataset {
         this.pixelModule = this.getPixelModule();
     }
 
-    getPixelData(){
-        return PixelData.get(this);
+    async getPixelData(){
+        return await PixelData.get(this);
     }
 
     getVOILutModule():DicomVOILutModule{
         return {
             voiLUTFunction:this.get(0x0028,0x1056),
-            windowWidth:this.int(0x0028,0x1050),
-            windowCenter:this.int(0x0028,0x1051),
+            windowWidth:this.int(0x0028,0x1051),
+            windowCenter:this.int(0x0028,0x1050),
             voiLUTSequence:this.get(0x0028,0x3010),
             lutDescriptor:this.get(0x0028,0x3002),
             lutExplanation:this.get(0x0028,0x3003),
@@ -198,8 +198,8 @@ class Dataset {
         return Tag.intTo4digitString(input);
     }
 
-    draw(canvas:HTMLCanvasElement){
-        const pixelDatas = this.getPixelData();
+    async draw(canvas:HTMLCanvasElement){
+        const pixelDatas = await this.getPixelData();
         if(pixelDatas){
             //@ts-ignore
             Draw.draw(canvas,pixelDatas,this);

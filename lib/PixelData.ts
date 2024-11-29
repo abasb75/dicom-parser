@@ -5,11 +5,11 @@ import UncompressDecoderr from "./decoder/Uncompressed";
 class PixelData {
 
 
-    static get(dataset:Dataset){
+    static async get(dataset:Dataset){
         const transferSyntaxUID = dataset.transferSyntaxUID;
         switch(transferSyntaxUID){
             case "1.2.840.10008.1.2.4.90":
-                return PixelData._getJPEG2000ImageCompression_LosslessOnly(dataset);
+                return await PixelData._getJPEG2000ImageCompression_LosslessOnly(dataset);
             case "1.2.840.10008.1.2":
             case "1.2.840.10008.1.2.1":
             case "1.2.840.10008.1.2.2":
@@ -21,35 +21,36 @@ class PixelData {
 
     private static _getUncompressed(dataset:Dataset){
         const bitsAllocated = dataset.pixelModule.bitsAllocated || 1;
-        let samplesPerPixel = dataset.pixelModule.samplesPerPixel || 1;
         const pixelRepresentation = dataset.pixelModule.pixelRepresentation || 0;
-        let photometricInterpretation = dataset.pixelModule.photometricInterpretation;
 
-        if (photometricInterpretation === 'YBR_FULL_422') {
-            samplesPerPixel = 2;
-        }
+        
         const pixelDataViews =  PixelData._getixelDataViews(dataset);
-        return pixelDataViews.map((dataView:DataView)=>{
+        return  pixelDataViews.map((dataView:DataView)=>{
             return UncompressDecoderr.decode({
                 pixelData:dataView,
                 bitsAllocated,
                 pixelRepresentation,
                 littleEndian:dataset.littleEndian,
+                dataset:dataset,
             });
         });
         
     }
 
-    private static _getJPEG2000ImageCompression_LosslessOnly(dataset:Dataset){
+    private static async _getJPEG2000ImageCompression_LosslessOnly(dataset:Dataset){
+        const bitsAllocated = dataset.pixelModule.bitsAllocated || 1;
+        const pixelRepresentation = dataset.pixelModule.pixelRepresentation || 0;
+
         const pixelDataViews =  PixelData._getixelDataViews(dataset);
-        return pixelDataViews.map((dataView:DataView)=>{
-            return JPEG2000.decode({
+        return Promise.all(pixelDataViews.map(async (dataView:DataView)=>{
+            return await JPEG2000.decode({
                 pixelData:dataView,
-                bitsAllocated:dataset.pixelModule.bitsAllocated || 1,
-                pixelRepresentation:dataset.pixelModule.pixelRepresentation || 0,
+                bitsAllocated,
+                pixelRepresentation,
                 littleEndian:dataset.littleEndian,
+                dataset:dataset,
             });
-        });
+        }));
     }
 
     private static _getixelDataViews(dataset:Dataset):DataView[]{
@@ -73,17 +74,16 @@ class PixelData {
                 const len = dataset.dataView.getUint32(offset,dataset.littleEndian);
                 offset +=4;
                 if(len !== 0){
-                    const dataView = new DataView(dataset.dataView.buffer,offset,len);
+                    const dataView = new DataView(dataset.dataView.buffer.slice(offset,offset+len));
                     pixelDatas.push(dataView);
                     offset += len;
                 }
-                
             }
         }else{
             const frameLen = pixelData.valueLength/numberOfFrames;
             for(let i=0;i<numberOfFrames;i++){
                 const offset = pixelData.offset + (frameLen * i);
-                const dataView = new DataView(dataset.dataView.buffer,offset,frameLen);
+                const dataView = new DataView(dataset.dataView.buffer.slice(offset,offset+frameLen));
                 pixelDatas.push(dataView);
             }
         }

@@ -1,11 +1,17 @@
 
 import { ChangeEvent, Suspense, useEffect, useRef, useState, useTransition } from 'react';
 //@ts-ignore
-import ReactJson from 'react-json-view'
+import ReactJson from 'react-json-view';
+
+// @ts-ignore
+
 import { loadAndParseFromFiles, loadAndParseFromUrl } from '@lib/index';
 import Dataset from '@lib/Dataset';
-import Draw from '@lib/Draw';
-import { PixelArray } from '@lib/types';
+
+import { decode, renderToCanvas } from "@abasb75/openjpeg";
+
+
+
 
 function App() {
 
@@ -29,6 +35,7 @@ function App() {
     setDcmData({});
     setErrorMessage("");
     loadAndParseFromUrl(url).then((dataset)=>{
+
       setLoading(false);
       setErrorMessage('');
       setDcmData(dataset);
@@ -44,22 +51,30 @@ function App() {
   }
 
   const fileInputChange = (event:ChangeEvent<HTMLInputElement>)=>{
-    console.log('file',event);
-    if (event.target.files && event.target.files[0]) {
-      loadAndParseFromFiles(event.target.files[0]).then(dataset=>{
-        setErrorMessage("");
-        drawDcm(dataset);
-        startTransition(()=>{
-          setDcmData(dataset);
-        });
-      }).catch(err=>{
-        if(typeof err === "string"){
-          setErrorMessage(err);
-        }
-      });
-    }
-  }
+    
+    if (event.target.files && event.target.files[0] && canvasRef.current) {
+      const dcmFile = event.target.files[0];
+      loadAndParseFromFiles(dcmFile).then((dataset)=>{
+          if(dataset && canvasRef.current){
+            dataset.draw(canvasRef.current);
+            // const decoded = await decode(dataset.getPixelData());
+          }
+          startTransition(()=>{
+            setDcmData(dataset);
+            setErrorMessage("");
+          })
+          
+      })
+      // dcmFile.arrayBuffer().then(async (buffer)=>{
+      //   const decoded = await decode(buffer);
+      //   renderToCanvas(decoded.frameInfo,decoded.decodedBuffer,canvasRef?.current as HTMLCanvasElement);
+      //   console.log(decoded);
+      // });
 
+        
+    }
+
+  }
   useEffect(()=>{
     console.log("dcm dataset",dcmData);
     
@@ -77,7 +92,7 @@ function App() {
       <div className='w-full h-[100vh] bg-slate-950 flex items-center justify-center flex-col'>
         <div className='w-full max-w-[768px] bg-white rounded border-slate-600 border-2 h-full max-h-[420px] flex flex-row'>
           <div className='bg-black w-1/3 flex items-center justify-center'>
-            <canvas ref={canvasRef} className='max-w-full max-h-full' />
+            <canvas id="xac" ref={canvasRef} className='max-w-full max-h-full' />
           </div>
           <div className='w-2/3'>
             <div className='h-[50px] w-full bg-black flex'>
@@ -98,7 +113,7 @@ function App() {
                     type='file' 
                     ref={fileInputRef} 
                     id="file-input" 
-                    accept='dcm' 
+                    accept='' 
                     className='hidden' 
                     onChange={fileInputChange}
                   />

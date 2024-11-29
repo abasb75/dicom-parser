@@ -64,6 +64,7 @@ interface PixelDataDecodeOptions {
     bitsAllocated:number;
     pixelRepresentation:number;
     littleEndian:boolean;
+    dataset?:Dataset;
 }
 
 
