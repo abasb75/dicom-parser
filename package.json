@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@abasb75/dicom-parser": "^0.0.4-test",
-    "@abasb75/openjpeg": "^2.5.2-test5",
+    "@abasb75/openjpeg": "^2.5.0-test",
     "@cornerstonejs/codec-openjpeg": "^1.2.4",
     "@itk-wasm/htj2k": "^2.3.1",
     "i": "^0.3.7",

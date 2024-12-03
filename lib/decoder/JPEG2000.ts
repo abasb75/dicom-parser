@@ -1,7 +1,5 @@
-import Draw from "../Draw";
-import Value from "../Value";
 import { PixelArray, PixelDataDecodeOptions } from "../types";
-import { decode, renderToCanvas } from "@abasb75/openjpeg";
+import { decode } from "@abasb75/openjpeg";
 
 class JPEG2000{
 
@@ -15,6 +13,8 @@ class JPEG2000{
             arrayBuffer.slice(offset,length)
         );
 
+        console.log(decoded,arrayBuffer,options.pixelData);
+
         if(!(decoded.decodedBuffer instanceof Uint8Array)){
             return null;
         }
@@ -22,22 +22,28 @@ class JPEG2000{
         switch(options.bitsAllocated){
             case  8:
                 if(decoded.frameInfo.isSigned){
-                    return JPEG2000._endianFixer(new Int8Array(
-                        decoded.decodedBuffer.buffer,
-                        decoded.decodedBuffer.byteOffset,
-                        decoded.decodedBuffer.byteLength,
-                    ),options.littleEndian);
+                    return JPEG2000._endianFixer(
+                        new Int8Array(
+                            decoded.decodedBuffer.buffer,
+                            decoded.decodedBuffer.byteOffset,
+                            decoded.decodedBuffer.byteLength,
+                        ),
+                        !options.littleEndian
+                    );
                 }else{
-                    return JPEG2000._endianFixer(new Uint8Array(
-                        decoded.decodedBuffer.buffer,
-                        decoded.decodedBuffer.byteOffset,
-                        decoded.decodedBuffer.byteLength,
-                    ),options.littleEndian);
+                    return JPEG2000._endianFixer(
+                        new Uint8Array(
+                            decoded.decodedBuffer.buffer,
+                            decoded.decodedBuffer.byteOffset,
+                            decoded.decodedBuffer.byteLength,
+                        ),
+                        !options.littleEndian
+                    );
                 }
             case 16:
                 if(decoded.frameInfo.isSigned){
                     return JPEG2000._endianFixer(
-                        new Int16Array(
+                        new Uint16Array(
                             decoded.decodedBuffer.buffer,
                             decoded.decodedBuffer.byteOffset,
                             decoded.decodedBuffer.byteLength/2,
@@ -46,7 +52,7 @@ class JPEG2000{
                     );
                 }else{
                     return JPEG2000._endianFixer(
-                        new Uint16Array(
+                        new Int16Array(
                             decoded.decodedBuffer.buffer,
                             decoded.decodedBuffer.byteOffset,
                             decoded.decodedBuffer.byteLength/2,

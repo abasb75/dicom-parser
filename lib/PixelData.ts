@@ -1,4 +1,5 @@
 import Dataset from "./Dataset";
+import Tag from "./Tag";
 import JPEG2000 from "./decoder/JPEG2000";
 import UncompressDecoderr from "./decoder/Uncompressed";
 
@@ -23,7 +24,6 @@ class PixelData {
         const bitsAllocated = dataset.pixelModule.bitsAllocated || 1;
         const pixelRepresentation = dataset.pixelModule.pixelRepresentation || 0;
 
-        
         const pixelDataViews =  PixelData._getixelDataViews(dataset);
         return  pixelDataViews.map((dataView:DataView)=>{
             return UncompressDecoderr.decode({
@@ -42,6 +42,8 @@ class PixelData {
         const pixelRepresentation = dataset.pixelModule.pixelRepresentation || 0;
 
         const pixelDataViews =  PixelData._getixelDataViews(dataset);
+        console.log('pixelDataViews',pixelDataViews);
+
         return Promise.all(pixelDataViews.map(async (dataView:DataView)=>{
             return await JPEG2000.decode({
                 pixelData:dataView,
@@ -69,13 +71,22 @@ class PixelData {
                 offset +=2;
                 
                 if(group !== 0xFFFE && element !== 0xE000){
-                    break;;
+                    break;
+                }else{
+                   
                 }
+                console.log('group',Tag.intTo4digitString(group));
+                console.log('element',Tag.intTo4digitString(element));
                 const len = dataset.dataView.getUint32(offset,dataset.littleEndian);
                 offset +=4;
                 if(len !== 0){
-                    const dataView = new DataView(dataset.dataView.buffer.slice(offset,offset+len));
-                    pixelDatas.push(dataView);
+                    console.log('element is 2',len)
+                    if(len>4){
+                        const dataView = new DataView(dataset.dataView.buffer.slice(offset,offset+len));
+                        pixelDatas.push(dataView);
+                    }else{
+                        offset -4;
+                    }
                     offset += len;
                 }
             }

@@ -3,12 +3,7 @@ import { ChangeEvent, Suspense, useEffect, useRef, useState, useTransition } fro
 //@ts-ignore
 import ReactJson from 'react-json-view';
 
-// @ts-ignore
-
 import { loadAndParseFromFiles, loadAndParseFromUrl } from '@lib/index';
-import Dataset from '@lib/Dataset';
-
-import { decode, renderToCanvas } from "@abasb75/openjpeg";
 
 
 
@@ -79,12 +74,6 @@ function App() {
     console.log("dcm dataset",dcmData);
     
   },[dcmData]);
-
-  const drawDcm = (dcmData:Dataset|{})=>{
-    if(dcmData instanceof Dataset && canvasRef.current){
-      dcmData.draw(canvasRef.current);
-    }
-  }
 
 
   return (

@@ -59,6 +59,12 @@ interface DicomPixelModule{
     samplesPerPixel:number|undefined;
 }
 
+interface DicomScalingModule {
+    rescaleSlope:number|undefined, 
+    rescaleIntercept:number|undefined, 
+    modality:string,
+}
+
 interface PixelDataDecodeOptions {
     pixelData:DataView;
     bitsAllocated:number;
@@ -78,6 +84,7 @@ export type {
     DicomVOILutModule,
     DicomPatientModule,
     DicomPixelModule,
+    DicomScalingModule,
 
     PixelArray,
     PixelDataDecodeOptions,

@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
 export default defineConfig({
-  // base: '/dicom-parser',
+  base: '/dicom-parser',
   plugins: [react()],
   resolve: {
     alias: {

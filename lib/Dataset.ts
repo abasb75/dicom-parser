@@ -2,7 +2,7 @@ import Draw from "./Draw";
 import PixelData from "./PixelData";
 import Tag from "./Tag";
 import Value from "./Value";
-import { DicomDate, DicomPatientModule, DicomPixelModule, DicomTime, DicomVOILutModule, Tags } from "./types";
+import { DicomDate, DicomPatientModule, DicomPixelModule, DicomScalingModule, DicomTime, DicomVOILutModule, Tags } from "./types";
 
 class Dataset {
     tags:Tags;
@@ -31,6 +31,7 @@ class Dataset {
     voiLUTModule:DicomVOILutModule;
     patientModule:DicomPatientModule;
     pixelModule:DicomPixelModule;
+    scalingModule:DicomScalingModule;
     constructor(tags:Tags,dataView:DataView,littleEndian:boolean){
         this.tags = tags;
         this.dataView = dataView;
@@ -49,6 +50,7 @@ class Dataset {
         this.voiLUTModule = this.getVOILutModule();
         this.patientModule = this.getPatientModule();
         this.pixelModule = this.getPixelModule();
+        this.scalingModule = this.getScalingModule();
     }
 
     async getPixelData(){
@@ -99,6 +101,14 @@ class Dataset {
         }
     }
 
+    getScalingModule():DicomScalingModule{
+        return {
+            rescaleSlope:this.int(0x0028,0x1053), 
+            rescaleIntercept:this.int(0x0028,0x1052), 
+            modality:this.modality as string,
+        }
+    }
+
     date(group:number,element:number){
         const dateValue = this.get(group,element);
         
@@ -133,8 +143,11 @@ class Dataset {
 
     int(group:number,element:number):number|undefined{
         const is = this.get(group,element);
+        console.log("int to pix",is,);
         if(typeof is === "number"){
             return is;
+        }else if(Array.isArray(is) && typeof is[0] === "number"){
+            return is[0] as number;
         }else{
             return undefined;
         }
