@@ -1,35 +1,36 @@
+import Dataset from "../Dataset";
 import { PixelArray, PixelDataDecodeOptions } from "../types";
 
 
 class UncompressDecoderr{
 
-    static decode(options:PixelDataDecodeOptions){
-        let arrayBuffer = options.pixelData.buffer;
-        let offset = options.pixelData.byteOffset;
-        const length = options.pixelData.byteLength;
-        switch(options.bitsAllocated){
+    static  decode(pixelData:DataView,dataset:Dataset){
+        let arrayBuffer = pixelData.buffer;
+        let offset = pixelData.byteOffset;
+        const length = pixelData.byteLength;
+        const bitsAllocated = dataset.pixelModule.bitsAllocated;
+        switch(bitsAllocated){
             case  8:
-
                 return UncompressDecoderr._endianFixer(
                     new Uint8Array(arrayBuffer, offset, length),
-                    !options.littleEndian,
+                    !dataset.littleEndian,
                 );
             case 16:
-                if (options.pixelRepresentation === 0) {
+                if (dataset.pixelRepresentation === 0) {
                     return UncompressDecoderr._endianFixer(
                         new Uint16Array(arrayBuffer, offset, length / 2),
-                        !options.littleEndian,
+                        !dataset.littleEndian,
                     );    
                 } else {
                     return UncompressDecoderr._endianFixer(
                         new Int16Array(arrayBuffer, offset, length / 2),
-                        !options.littleEndian
+                        !dataset.littleEndian
                     );
                 }
             case 32:
                 return UncompressDecoderr._endianFixer(
                     new Float32Array(arrayBuffer, offset, length / 4),
-                    !options.littleEndian
+                    !dataset.littleEndian
                 );
             default:
                 return new Uint8Array(arrayBuffer);

@@ -1,58 +1,20 @@
 import Dataset from "./Dataset";
 import Tag from "./Tag";
+import Value from "./Value";
 import JPEG2000 from "./decoder/JPEG2000";
 import UncompressDecoderr from "./decoder/Uncompressed";
 
 class PixelData {
 
 
-    static async get(dataset:Dataset){
-        const transferSyntaxUID = dataset.transferSyntaxUID;
-        switch(transferSyntaxUID){
-            case "1.2.840.10008.1.2.4.90":
-                return await PixelData._getJPEG2000ImageCompression_LosslessOnly(dataset);
-            case "1.2.840.10008.1.2":
-            case "1.2.840.10008.1.2.1":
-            case "1.2.840.10008.1.2.2":
-            case "1.2.840.10008.1.2.1.99":
-            default:
-                return PixelData._getUncompressed(dataset);
+    static async get(dataset:Dataset,frame:number=0){
+        const pixelDatas = PixelData._getixelDataViews(dataset);
+        if(frame > pixelDatas.length){
+            throw new Error(`Frame ${frame} not found.`);
         }
-    }
+        return pixelDatas[frame];
 
-    private static _getUncompressed(dataset:Dataset){
-        const bitsAllocated = dataset.pixelModule.bitsAllocated || 1;
-        const pixelRepresentation = dataset.pixelModule.pixelRepresentation || 0;
-
-        const pixelDataViews =  PixelData._getixelDataViews(dataset);
-        return  pixelDataViews.map((dataView:DataView)=>{
-            return UncompressDecoderr.decode({
-                pixelData:dataView,
-                bitsAllocated,
-                pixelRepresentation,
-                littleEndian:dataset.littleEndian,
-                dataset:dataset,
-            });
-        });
         
-    }
-
-    private static async _getJPEG2000ImageCompression_LosslessOnly(dataset:Dataset){
-        const bitsAllocated = dataset.pixelModule.bitsAllocated || 1;
-        const pixelRepresentation = dataset.pixelModule.pixelRepresentation || 0;
-
-        const pixelDataViews =  PixelData._getixelDataViews(dataset);
-        console.log('pixelDataViews',pixelDataViews);
-
-        return Promise.all(pixelDataViews.map(async (dataView:DataView)=>{
-            return await JPEG2000.decode({
-                pixelData:dataView,
-                bitsAllocated,
-                pixelRepresentation,
-                littleEndian:dataset.littleEndian,
-                dataset:dataset,
-            });
-        }));
     }
 
     private static _getixelDataViews(dataset:Dataset):DataView[]{

@@ -1,25 +1,26 @@
+import Dataset from "../Dataset";
 import { PixelArray, PixelDataDecodeOptions } from "../types";
+//  @ts-ignore
 import { decode } from "@abasb75/openjpeg";
 
 class JPEG2000{
 
-    static async  decode(options:PixelDataDecodeOptions){
+    static async  decode(pixelData:DataView,dataset:Dataset){
 
-        let arrayBuffer = options.pixelData.buffer;
-        let offset = options.pixelData.byteOffset;
-        const length = options.pixelData.byteLength;
+        let arrayBuffer = pixelData.buffer;
+        let offset = pixelData.byteOffset;
+        const length = pixelData.byteLength;
 
         const decoded = await decode(
             arrayBuffer.slice(offset,length)
         );
 
-        console.log(decoded,arrayBuffer,options.pixelData);
-
         if(!(decoded.decodedBuffer instanceof Uint8Array)){
             return null;
         }
 
-        switch(options.bitsAllocated){
+        const bitsAllocated = dataset.pixelModule.bitsAllocated;
+        switch(bitsAllocated){
             case  8:
                 if(decoded.frameInfo.isSigned){
                     return JPEG2000._endianFixer(
@@ -28,7 +29,7 @@ class JPEG2000{
                             decoded.decodedBuffer.byteOffset,
                             decoded.decodedBuffer.byteLength,
                         ),
-                        !options.littleEndian
+                        !dataset.littleEndian
                     );
                 }else{
                     return JPEG2000._endianFixer(
@@ -37,7 +38,7 @@ class JPEG2000{
                             decoded.decodedBuffer.byteOffset,
                             decoded.decodedBuffer.byteLength,
                         ),
-                        !options.littleEndian
+                        !dataset.littleEndian
                     );
                 }
             case 16:
@@ -48,7 +49,7 @@ class JPEG2000{
                             decoded.decodedBuffer.byteOffset,
                             decoded.decodedBuffer.byteLength/2,
                         ),
-                        !options.littleEndian
+                        !dataset.littleEndian
                     );
                 }else{
                     return JPEG2000._endianFixer(
@@ -57,7 +58,7 @@ class JPEG2000{
                             decoded.decodedBuffer.byteOffset,
                             decoded.decodedBuffer.byteLength/2,
                         ),
-                        !options.littleEndian
+                        !dataset.littleEndian
                     );
                 }
             case 32:
@@ -67,7 +68,7 @@ class JPEG2000{
                         decoded.decodedBuffer.byteOffset,
                         decoded.decodedBuffer.byteLength/4,
                     ),
-                    !options.littleEndian
+                    !dataset.littleEndian
                 );
             default:
                 return new Uint8Array(arrayBuffer);

@@ -1,7 +1,9 @@
-import Draw from "./Draw";
+
 import PixelData from "./PixelData";
 import Tag from "./Tag";
 import Value from "./Value";
+import Decoder from "./decoder/Decoder";
+import Canvas2D from "./draw/Canvas2D";
 import { DicomDate, DicomPatientModule, DicomPixelModule, DicomScalingModule, DicomTime, DicomVOILutModule, Tags } from "./types";
 
 class Dataset {
@@ -53,8 +55,8 @@ class Dataset {
         this.scalingModule = this.getScalingModule();
     }
 
-    async getPixelData(){
-        return await PixelData.get(this);
+    async getPixelData(frame:number=0){
+        return await PixelData.get(this,frame);
     }
 
     getVOILutModule():DicomVOILutModule{
@@ -113,7 +115,6 @@ class Dataset {
         const dateValue = this.get(group,element);
         
         if(/^[0-9]{4}\-[0-9]{2}\-[0-9]{2}$/.exec(dateValue)){
-            console.log('dateValue1',dateValue);
             const dateVaues = dateValue.split('-');
             return {
                 year:dateVaues[0],
@@ -121,7 +122,6 @@ class Dataset {
                 day:dateVaues[2],
             };
         }
-        console.log('dateValue',dateValue);
         return dateValue;
     }
 
@@ -129,7 +129,6 @@ class Dataset {
         const dateValue = this.get(group,element);
         
         if(/^[0-9]{2}\:[0-9]{2}\:[0-9]{2}$/.exec(dateValue)){
-            console.log('dateValue1',dateValue);
             const dateVaues = dateValue.split(':');
             return {
                 hour:dateVaues[0],
@@ -137,13 +136,11 @@ class Dataset {
                 second:dateVaues[2],
             };
         }
-        console.log('dateValue',dateValue);
         return dateValue;
     }
 
     int(group:number,element:number):number|undefined{
         const is = this.get(group,element);
-        console.log("int to pix",is,);
         if(typeof is === "number"){
             return is;
         }else if(Array.isArray(is) && typeof is[0] === "number"){
@@ -211,12 +208,28 @@ class Dataset {
         return Tag.intTo4digitString(input);
     }
 
-    async draw(canvas:HTMLCanvasElement){
-        const pixelDatas = await this.getPixelData();
-        if(pixelDatas){
-            //@ts-ignore
-            Draw.draw(canvas,pixelDatas,this);
+    async draw(canvas:HTMLCanvasElement,frame:number=0,canvasType:'2D'='2D'){
+        const pixelData = await this.getPixelData(frame);
+        const decoded = await Decoder.decode(pixelData,this);
+        if(pixelData){
+            switch(canvasType){
+                case "2D":
+                default:
+                    //@ts-ignore
+                    Canvas2D.draw(canvas,decoded,this);
+            }
+        }else{
+
         }
+    }
+
+    isColoredImage():boolean{
+        switch(this.pixelModule.photometricInterpretation){
+            case "RGB":
+                return true;
+            default:
+                return false;
+        } 
     }
     
 }

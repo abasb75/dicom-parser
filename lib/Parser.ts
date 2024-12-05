@@ -29,13 +29,11 @@ class Parser {
 
 
         if(this.arrayBuffer.byteLength < 132){
-            console.error("is not valid dicom file");
             return;
         }
 
         const prefix =Value.getString(new Uint8Array(arrayBuffer,128,4));
         if(prefix !== 'DICM'){
-            console.error("is not valid dicom file");
             return;
         }
 
@@ -49,7 +47,6 @@ class Parser {
     parse(){
         this.getNextElement();
         this.dataSet = new Dataset(this.tags,this.dataView,this.littleEndian);
-        console.log(this.dataSet)
         this.dataSet.transferSyntaxUID = this.transferSyntaxUID;
         return this.dataSet;
     }
@@ -110,7 +107,6 @@ class Parser {
             len = this.dataView.getUint16(this.offset,this.littleEndian);
             this.offset += 2;
         }else if((!vr || !vr.match(/^[A-Z]{2}$/)) && group===0x0002 && element===0x0000){
-            console.log("pyz");
             this.offset = 132;
             this.tags = {};
             this.implicit = true;
@@ -146,7 +142,6 @@ class Parser {
             
         }
         
-
         if(vr === "SQ" ){
             this.getNextElement();
         }else{

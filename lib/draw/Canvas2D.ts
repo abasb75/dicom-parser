@@ -1,31 +1,29 @@
-import Dataset from "./Dataset";
-import Utilities from "./Utitlities";
-import { PixelArray } from "./types";
+import Dataset from "../Dataset";
+import Utilities from "../Utitlities";
+import { PixelArray } from "../types";
 
-class Draw {
+class Canvas2D {
 
-    static draw(canvas:HTMLCanvasElement,pixelDatas:PixelArray[],dataset:Dataset){
+    static draw(canvas:HTMLCanvasElement,pixelDatas:PixelArray,dataset:Dataset){
         
         if(!pixelDatas.length) return;
 
-        const pixelData = Draw._scalePixelData(pixelDatas[0],dataset);
-        console.log(pixelDatas.length);
-        const {min,max,windowCenter,windowWidth} = Draw._getLUT(pixelData,dataset);
-        console.log('lut',min,max,windowCenter,windowWidth)
+        const pixelData = Canvas2D._scalePixelData(pixelDatas,dataset);
+        
+        const {min,max,windowCenter,windowWidth} = Canvas2D._getLUT(pixelData,dataset);
         canvas.width = dataset.pixelModule.columns || 0;
         canvas.height= dataset.pixelModule.rows || 0;
 
-        console.log( canvas.width *  canvas.height  , pixelData.length)
+        console.log(pixelData,dataset.pixelModule.columns,dataset.pixelModule.rows);
 
         const context = canvas.getContext('2d');
         const imageData = context?.createImageData(canvas.width,canvas.height);
                   
-        console.log('pixelData.length',pixelData.length);
         if(imageData){
             for(var i = 0; i < pixelData.length; i++) {
-                imageData.data[4*i] = Draw._calcPixel(pixelData[i],min,max,windowWidth,windowCenter);
-                imageData.data[4*i+1] = Draw._calcPixel(pixelData[i],min,max,windowWidth,windowCenter);
-                imageData.data[4*i+2] = Draw._calcPixel(pixelData[i],min,max,windowWidth,windowCenter);
+                imageData.data[4*i] = Canvas2D._calcPixel(pixelData[i],min,max,windowWidth,windowCenter);
+                imageData.data[4*i+1] = Canvas2D._calcPixel(pixelData[i],min,max,windowWidth,windowCenter);
+                imageData.data[4*i+2] = Canvas2D._calcPixel(pixelData[i],min,max,windowWidth,windowCenter);
                 imageData.data[4*i+3] = 255;
             }
             context?.putImageData(imageData,0,0);
@@ -34,7 +32,6 @@ class Draw {
     }
 
     private static _getLUT(pixelData:PixelArray,dataset:Dataset){
-        console.log('_getLUT',dataset.voiLUTModule.windowCenter)
         if(dataset.voiLUTModule.windowCenter && dataset.voiLUTModule.windowWidth){
             const windowWidth = dataset.voiLUTModule.windowWidth;
             const windowCenter = dataset.voiLUTModule.windowCenter;
@@ -97,4 +94,4 @@ class Draw {
 
 }
 
-export default Draw;
+export default Canvas2D;
