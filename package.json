@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -14,10 +14,11 @@
   },
   "dependencies": {
     "@abasb75/dicom-parser": "^0.0.4-test",
-    "@abasb75/openjpeg": "^2.5.0-test",
+    "@abasb75/openjpeg": "^2.5.2",
     "@cornerstonejs/codec-openjpeg": "^1.2.4",
     "@itk-wasm/htj2k": "^2.3.1",
     "i": "^0.3.7",
+    "jpeg-js": "^0.4.4",
     "jpeg2000": "^1.1.1",
     "npm": "^10.9.1",
     "pako": "^2.1.0",
@@ -25,7 +26,8 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-json-view": "^1.21.3",
-    "react-object-view": "^0.3.5"
+    "react-object-view": "^0.3.5",
+    "vite-plugin-commonjs": "^0.10.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",

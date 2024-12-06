@@ -22,7 +22,7 @@ class Canvas2D {
                 for(var i = 0; i < pixelData.length; i++) {
                     imageData.data[i] = Canvas2D._calcPixel(pixelData[i],min,max,windowWidth,windowCenter);
                 }
-            }else{
+            }else if(imageData.data.length/4 === pixelData.length){
                 for(var i = 0; i < pixelData.length; i++) {
                     imageData.data[4*i] = Canvas2D._calcPixel(pixelData[i],min,max,windowWidth,windowCenter);
                     imageData.data[4*i+1] = Canvas2D._calcPixel(pixelData[i],min,max,windowWidth,windowCenter);
