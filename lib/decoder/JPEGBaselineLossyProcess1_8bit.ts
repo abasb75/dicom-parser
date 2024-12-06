@@ -9,49 +9,39 @@ class JPEGBaselineLossyProcess1_8bit{
         ) {
             // decode with browser option.
             return JPEGBaselineLossyProcess1_8bit.browser(pixelData,dataset);
+        }else{
+            throw new Error('dicom parser not support your image!');
         }
     }
 
 
     static async browser(pixelData:DataView,dataset:Dataset){
-        const imgBlob = new Blob([pixelData], { type: 'image/jpeg' });
-        console.log('imgBlob',imgBlob);
 
-        const fileReader = new FileReader();
+        const createImage = (imageData)=>new Promise<HTMLImageElement>((resolve,reject)=>{
+            var img = document.createElement('img');
+            img.src = imageData;
+            img.onload = ()=>{
+                resolve(img);
+            }
+            img.onerror = ()=>{
+                reject();
+            }
+        });
 
-        if (fileReader.readAsBinaryString === undefined) {
-        fileReader.readAsArrayBuffer(imgBlob);
-        } else {
-        fileReader.readAsBinaryString(imgBlob); // doesn't work on IE11
-        }
+        var arrayBufferView = new Uint8Array( pixelData.buffer );
+        var blob = new Blob( [ arrayBufferView ], { type: "image/jpeg" } );
+        var urlCreator = window.URL || window.webkitURL;
+        var imageUrl = urlCreator.createObjectURL( blob );
+        const img = await createImage(imageUrl);
 
-        fileReader.onload = function () {
-            const img = new Image();
+        const canvas = document.createElement('canvas') as HTMLCanvasElement;
+        canvas.height = img.height;
+        canvas.width = img.width;
+        const context = canvas.getContext('2d');
+        context.drawImage(img, 0, 0);
 
-            img.onload = function () {
-                const canvas = document.createElement('canvas') as HTMLCanvasElement;
-                canvas.height = img.height;
-                canvas.width = img.width;
-                const context = canvas.getContext('2d');
-
-                context.drawImage(this as any, 0, 0);
-                const imageData = context.getImageData(0, 0, img.width, img.height);
-                const end = new Date().getTime();
-
-                const  pixelData = new Uint8Array(imageData.data.buffer);
-            };
-
-
-            if (fileReader.readAsBinaryString === undefined) {
-                img.src = `data:image/jpeg;base64,${window.btoa(
-                    arrayBufferToString(fileReader.result as ArrayBuffer)
-                )}`;
-            } else {
-                    img.src = `data:image/jpeg;base64,${window.btoa(
-                    fileReader.result as string
-            )}`; 
-      }
-    };
+        const imageData = context.getImageData(0,0,img.width,img.height);
+        return new Uint8Array(imageData.data.buffer);
 
     }
 }

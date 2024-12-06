@@ -52,19 +52,13 @@ function App() {
       loadAndParseFromFiles(dcmFile).then((dataset)=>{
           if(dataset && canvasRef.current){
             dataset.draw(canvasRef.current);
-            // const decoded = await decode(dataset.getPixelData());
           }
           startTransition(()=>{
             setDcmData(dataset);
             setErrorMessage("");
           })
           
-      })
-      // dcmFile.arrayBuffer().then(async (buffer)=>{
-      //   const decoded = await decode(buffer);
-      //   renderToCanvas(decoded.frameInfo,decoded.decodedBuffer,canvasRef?.current as HTMLCanvasElement);
-      //   console.log(decoded);
-      // });
+      });
 
         
     }

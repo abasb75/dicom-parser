@@ -1,8 +1,5 @@
 import Dataset from "./Dataset";
 import Tag from "./Tag";
-import Value from "./Value";
-import JPEG2000 from "./decoder/JPEG2000";
-import UncompressDecoderr from "./decoder/Uncompressed";
 
 class PixelData {
 

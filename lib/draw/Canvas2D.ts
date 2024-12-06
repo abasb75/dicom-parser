@@ -14,17 +14,21 @@ class Canvas2D {
         canvas.width = dataset.pixelModule.columns || 0;
         canvas.height= dataset.pixelModule.rows || 0;
 
-        console.log(pixelData,dataset.pixelModule.columns,dataset.pixelModule.rows);
-
         const context = canvas.getContext('2d');
         const imageData = context?.createImageData(canvas.width,canvas.height);
-                  
+    
         if(imageData){
-            for(var i = 0; i < pixelData.length; i++) {
-                imageData.data[4*i] = Canvas2D._calcPixel(pixelData[i],min,max,windowWidth,windowCenter);
-                imageData.data[4*i+1] = Canvas2D._calcPixel(pixelData[i],min,max,windowWidth,windowCenter);
-                imageData.data[4*i+2] = Canvas2D._calcPixel(pixelData[i],min,max,windowWidth,windowCenter);
-                imageData.data[4*i+3] = 255;
+            if(imageData.data.length === pixelData.length){
+                for(var i = 0; i < pixelData.length; i++) {
+                    imageData.data[i] = Canvas2D._calcPixel(pixelData[i],min,max,windowWidth,windowCenter);
+                }
+            }else{
+                for(var i = 0; i < pixelData.length; i++) {
+                    imageData.data[4*i] = Canvas2D._calcPixel(pixelData[i],min,max,windowWidth,windowCenter);
+                    imageData.data[4*i+1] = Canvas2D._calcPixel(pixelData[i],min,max,windowWidth,windowCenter);
+                    imageData.data[4*i+2] = Canvas2D._calcPixel(pixelData[i],min,max,windowWidth,windowCenter);
+                    imageData.data[4*i+3] = 255;
+                }
             }
             context?.putImageData(imageData,0,0);
         }
@@ -90,7 +94,7 @@ class Canvas2D {
         }
       
         return pixelData;
-      }
+    }
 
 }
 

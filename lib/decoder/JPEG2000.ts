@@ -1,5 +1,5 @@
 import Dataset from "../Dataset";
-import { PixelArray, PixelDataDecodeOptions } from "../types";
+import { PixelArray } from "../types";
 //  @ts-ignore
 import { decode } from "@abasb75/openjpeg";
 
