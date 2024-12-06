@@ -15,7 +15,4 @@ export default defineConfig({
       "@src":"/react-test",
     },
   },
-  build: {
-    commonjsOptions: { transformMixedEsModules: true } // Change
-  }
 })

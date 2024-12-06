@@ -6,7 +6,7 @@ class JPEGBaselineLossyProcess1_8bit{
         
         if (
             dataset.pixelModule.bitsAllocated === 8 &&
-            [3,4].includes(dataset.pixelModule.samplesPerPixel)
+            [3,4].includes(dataset.pixelModule.samplesPerPixel as number)
         ) {
             // decode with browser option.
             return JPEGBaselineLossyProcess1_8bit.browser(pixelData);
@@ -26,7 +26,7 @@ class JPEGBaselineLossyProcess1_8bit{
 
     static async browser(pixelData:DataView){
         try{
-            const createImage = (imageData)=>new Promise<HTMLImageElement>((resolve,reject)=>{
+            const createImage = (imageData:any)=>new Promise<HTMLImageElement>((resolve,reject)=>{
                 var img = document.createElement('img');
                 img.src = imageData;
                 img.onload = ()=>{
@@ -47,10 +47,10 @@ class JPEGBaselineLossyProcess1_8bit{
             canvas.height = img.height;
             canvas.width = img.width;
             const context = canvas.getContext('2d');
-            context.drawImage(img, 0, 0);
+            context?.drawImage(img, 0, 0);
 
-            const imageData = context.getImageData(0,0,img.width,img.height);
-            return new Uint8Array(imageData.data.buffer);
+            const imageData = context?.getImageData(0,0,img.width,img.height);
+            return new Uint8Array(imageData?.data?.buffer as ArrayBufferLike);
         }catch{
             return JPEGBaselineLossyProcess1_8bit.jpegJS(pixelData);
         }
