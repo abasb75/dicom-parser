@@ -1,20 +1,26 @@
+import { decode } from "@abasb75/turbojpeg";
 import Dataset from "../Dataset";
 const jpeg = require('jpeg-js');
 
 class JPEGBaselineLossyProcess1_8bit{
     static async decode(pixelData:DataView,dataset:Dataset){
         
-        if (
-            dataset.pixelModule.bitsAllocated === 8 &&
-            [3,4].includes(dataset.pixelModule.samplesPerPixel as number)
-        ) {
-            // decode with browser option.
-            return JPEGBaselineLossyProcess1_8bit.browser(pixelData);
-        }else{
-            return JPEGBaselineLossyProcess1_8bit.jpegJS(pixelData);
-        }
-    }
+        // if (
+        //     dataset.pixelModule.bitsAllocated === 8 &&
+        //     [3,4].includes(dataset.pixelModule.samplesPerPixel as number)
+        // ) {
+        //     // decode with browser option.
+        //     // return JPEGBaselineLossyProcess1_8bit.browser(pixelData);
+        // }else{
+        //     return JPEGBaselineLossyProcess1_8bit.jpegJS(pixelData);
+        // }
 
+        
+        const data = await JPEGBaselineLossyProcess1_8bit.turboJpeg(pixelData);
+        console.log(data);
+        return data;
+        
+    }
 
     static async jpegJS(pixelData:DataView){
         const decoded = jpeg.decode(pixelData.buffer,{useTArray: true});
@@ -55,6 +61,11 @@ class JPEGBaselineLossyProcess1_8bit{
             return JPEGBaselineLossyProcess1_8bit.jpegJS(pixelData);
         }
 
+    }
+
+    static async turboJpeg(pixelData:DataView){
+        const decoded = await decode(pixelData.buffer);
+        return decoded?.decodedBuffer;
     }
 }
 

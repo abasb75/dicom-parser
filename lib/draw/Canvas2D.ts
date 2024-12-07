@@ -19,15 +19,24 @@ class Canvas2D {
     
         if(imageData){
             if(imageData.data.length === pixelData.length){
-                for(var i = 0; i < pixelData.length; i++) {
+                for(let i = 0; i < pixelData.length; i++) {
                     imageData.data[i] = Canvas2D._calcPixel(pixelData[i],min,max,windowWidth,windowCenter);
                 }
             }else if(imageData.data.length/4 === pixelData.length){
-                for(var i = 0; i < pixelData.length; i++) {
+                for(let i = 0; i < pixelData.length; i++) {
                     imageData.data[4*i] = Canvas2D._calcPixel(pixelData[i],min,max,windowWidth,windowCenter);
                     imageData.data[4*i+1] = Canvas2D._calcPixel(pixelData[i],min,max,windowWidth,windowCenter);
                     imageData.data[4*i+2] = Canvas2D._calcPixel(pixelData[i],min,max,windowWidth,windowCenter);
                     imageData.data[4*i+3] = 255;
+                }
+            }else if((3*imageData.data.length)/4 === pixelData.length){
+                let imageDataIndex = 0;
+                for(let i = 0; i < pixelData.length; i+=3) {
+                    imageData.data[imageDataIndex++] = Canvas2D._calcPixel(pixelData[i],min,max,windowWidth,windowCenter);
+                    imageData.data[imageDataIndex++] = Canvas2D._calcPixel(pixelData[i+1],min,max,windowWidth,windowCenter);
+                    imageData.data[imageDataIndex++] = Canvas2D._calcPixel(pixelData[i+2],min,max,windowWidth,windowCenter);
+                    imageData.data[imageDataIndex++] = 255;
+
                 }
             }
             context?.putImageData(imageData,0,0);
