@@ -3,7 +3,8 @@
     "baseUrl": ".",
     "paths":{
       "@src/*": ["react-test/*"],
-      "@lib/*":["./lib/*"]
+      "@lib/*":["./lib/*"],
+      "@package/*":["./package/*"]
     },
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "incremental": true,
@@ -28,5 +29,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
   },
-  "include": ["react-test","lib"]
+  "include": ["react-test","lib", "draw/Utitlities.ts"]
 }

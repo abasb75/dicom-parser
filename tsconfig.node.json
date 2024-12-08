@@ -3,7 +3,8 @@
     "baseUrl": ".",
     "paths":{
       "@lib/*": ["./lib/*"],
-      "@src/*":["react-test/*"]
+      "@src/*":["react-test/*"],
+      "@package/*":["./package/*"]
     },
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "composite": true,

@@ -4,6 +4,10 @@ import Tag from "./Tag";
 class PixelData {
 
 
+    static async getAll(dataset:Dataset){
+        return PixelData._getixelDataViews(dataset);
+    }
+
     static async get(dataset:Dataset,frame:number=0){
         const pixelDatas = PixelData._getixelDataViews(dataset);
         if(frame > pixelDatas.length){

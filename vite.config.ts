@@ -13,6 +13,7 @@ export default defineConfig({
     alias: {
       "@lib":"/lib",
       "@src":"/react-test",
+      "@package":"/package",
     },
   },
 })

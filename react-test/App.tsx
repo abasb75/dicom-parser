@@ -3,7 +3,9 @@ import { ChangeEvent, Suspense, useEffect, useRef, useState, useTransition } fro
 //@ts-ignore
 import ReactJson from 'react-json-view';
 
-import { loadAndParseFromFiles, loadAndParseFromUrl } from '@lib/index';
+// import { loadAndParseFromFiles, loadAndParseFromUrl } from '@lib/index'; //devlop
+// import { loadAndParseFromFiles, loadAndParseFromUrl } from '@package/index'; //test  package
+import { loadAndParseFromFiles, loadAndParseFromUrl } from '@package/index'; // test after deploy
 
 
 
@@ -18,7 +20,7 @@ function App() {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  // const canvasRef = useRef<HTMLCanvasElement>(null);
   
   const parseInputUrl = ()=>{
     const url = inputRef.current?.value;
@@ -47,12 +49,12 @@ function App() {
 
   const fileInputChange = (event:ChangeEvent<HTMLInputElement>)=>{
     
-    if (event.target.files && event.target.files[0] && canvasRef.current) {
+    if (event.target.files && event.target.files[0] ) {
       const dcmFile = event.target.files[0];
       loadAndParseFromFiles(dcmFile).then((dataset)=>{
-          if(dataset && canvasRef.current){
-            dataset.draw(canvasRef.current);
-          }
+          // if(dataset && canvasRef.current){
+          //   // dataset.draw(canvasRef.current);
+          // }
           startTransition(()=>{
             setDcmData(dataset);
             setErrorMessage("");
@@ -74,10 +76,10 @@ function App() {
     <>
       <div className='w-full h-[100vh] bg-slate-950 flex items-center justify-center flex-col'>
         <div className='w-full max-w-[768px] bg-white rounded border-slate-600 border-2 h-full max-h-[420px] flex flex-row'>
-          <div className='bg-black w-1/3 flex items-center justify-center'>
+          {/* <div className='bg-black w-1/3 flex items-center justify-center'>
             <canvas id="xac" ref={canvasRef} className='max-w-full max-h-full' />
-          </div>
-          <div className='w-2/3'>
+          </div> */}
+          <div className='w-full'>
             <div className='h-[50px] w-full bg-black flex'>
                 <input 
                   type='text' 

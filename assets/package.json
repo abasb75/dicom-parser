@@ -1,6 +1,6 @@
 {
     "name": "@abasb75/dicom-parser",
-    "version": "0.0.5-test",
+    "version": "0.0.0-test2",
     "description": "a javascript powerfull dicom parser",
     "main": "index.js",
     "type": "module",
@@ -23,14 +23,10 @@
     },
     "homepage": "https://github.com/abasb75/dicom-parser#readme",
     "dependencies": {
-        "pako": "^2.1.0",
-        "@abasb75/openjpeg": "^2.5.2",
-        "jpeg-js": "^0.4.4"
+        "pako": "^2.1.0"
     },
     "peerDependencies": {
-        "pako": "^2.1.0",
-        "@abasb75/openjpeg": "^2.5.0-test",
-        "jpeg-js": "^0.4.4"
+        "pako": "^2.1.0"
     },
     "devDependencies": {
         "@types/pako": "^2.0.3"

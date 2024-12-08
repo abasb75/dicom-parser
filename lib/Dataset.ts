@@ -2,11 +2,14 @@
 import PixelData from "./PixelData";
 import Tag from "./Tag";
 import Value from "./Value";
-import Decoder from "./decoder/Decoder";
-import Canvas2D from "./draw/Canvas2D";
 import { DicomDate, DicomPatientModule, DicomPixelModule, DicomScalingModule, DicomTime, DicomVOILutModule, Tags } from "./types";
 
 class Dataset {
+    
+    /** duration of parse */
+    start:number;
+    end:number|undefined;
+
     tags:Tags;
     transferSyntaxUID:string = "1.2.840.10008.1.2";
     dataView:DataView;
@@ -29,12 +32,14 @@ class Dataset {
     rows:string|number|undefined;
     columns:string|number|undefined;
     patientSex:any;
+
     /** modules */
     voiLUTModule:DicomVOILutModule;
     patientModule:DicomPatientModule;
     pixelModule:DicomPixelModule;
     scalingModule:DicomScalingModule;
-    constructor(tags:Tags,dataView:DataView,littleEndian:boolean){
+    
+    constructor(tags:Tags,dataView:DataView,littleEndian:boolean,start:number,end:number){
         this.tags = tags;
         this.dataView = dataView;
         this.littleEndian = littleEndian;
@@ -53,6 +58,19 @@ class Dataset {
         this.patientModule = this.getPatientModule();
         this.pixelModule = this.getPixelModule();
         this.scalingModule = this.getScalingModule();
+        this.start = start;
+        this.end = end;
+    }
+
+    hasPixelData():boolean{
+        if(
+            this.tags['0x7FE00010'] 
+            || this.tags['0x7FE00008'] 
+            || this.tags['0x7FE00009']
+        ){
+            return true;
+        }
+        return false;
     }
 
     async getPixelData(frame:number=0){
@@ -99,7 +117,12 @@ class Dataset {
             bitsAllocated:this.int(0x0028,0x0100),
             highBit:this.int(0x0028,0x0102),
             bitsStored:this.int(0x0028,0x0101),
-            samplesPerPixel:this.int(0x0028,0x0002)
+            samplesPerPixel:this.int(0x0028,0x0002),
+            pixelDataProviderURL:this.get(0x0028,0x7FE0),
+            pixelPaddingRangeLimit:this.get(0x0028,0x0121),
+            extendedOffsetTable:this.get(0x7FE0,0x0001),
+            extendedOffsetTableLengths:this.get(0x7FE0,0x0002),
+            pixelAspectRatio:this.get(0x0028,0x0034)
         }
     }
 
@@ -206,30 +229,6 @@ class Dataset {
             return input.replace(/^0[xX]/,'');
         }
         return Tag.intTo4digitString(input);
-    }
-
-    async draw(canvas:HTMLCanvasElement,frame:number=0,canvasType:'2D'='2D'){
-        const pixelData = await this.getPixelData(frame);
-        const decoded = await Decoder.decode(pixelData,this);
-        if(pixelData){
-            switch(canvasType){
-                case "2D":
-                default:
-                    //@ts-ignore
-                    Canvas2D.draw(canvas,decoded,this);
-            }
-        }else{
-
-        }
-    }
-
-    isColoredImage():boolean{
-        switch(this.pixelModule.photometricInterpretation){
-            case "RGB":
-                return true;
-            default:
-                return false;
-        } 
     }
     
 }

@@ -6,12 +6,16 @@ import * as pako from "pako";
 
 class Parser {
 
+
+    private start:number;
+    private end:number|undefined;
+
     private arrayBuffer;
     private offset:number;
     private dataView:DataView;
     private tags:Tags = {};
     private dataSet:Dataset|undefined;
-    private EXEPTED = ["OB", "OW", "SQ", "UN","UT"];
+    private EXEPTED = ["OB", "OW", "SQ", "UN","UT","OF","UC"];
     private VRS = ["AE", "AS", "AT", "CS", "DA", "DS", "DT", "FL", "FD", "IS", "LO", "LT", "OB", "OD", "OF", "OW", "PN", "SH", "SL", "SS", "ST", "TM", "UI", "UL", "UN", "US", "UT", "UC"];
     private IMPLICT_TRANSFER_SYNTAXES = ["1.2.840.10008.1.2"];
     private BIG_ENDIAN_TRANSFER_SYNTAXES = ["1.2.840.10008.1.2.2"];
@@ -23,6 +27,7 @@ class Parser {
     private inflated:boolean = false;
 
     constructor(arrayBuffer:ArrayBuffer){
+        this.start = Date.now();
         this.offset = 0;
         this.arrayBuffer = arrayBuffer;
         this.dataView = new DataView(arrayBuffer);
@@ -46,7 +51,14 @@ class Parser {
 
     parse(){
         this.getNextElement();
-        this.dataSet = new Dataset(this.tags,this.dataView,this.littleEndian);
+        this.end = Date.now();
+        this.dataSet = new Dataset(
+            this.tags,
+            this.dataView,
+            this.littleEndian,
+            this.start,
+            this.end
+        );
         this.dataSet.transferSyntaxUID = this.transferSyntaxUID;
         return this.dataSet;
     }
@@ -93,8 +105,7 @@ class Parser {
 
         const vr = this.getNextVR(group,element);
         let len=0;
-        
-        
+
         if(this.implicit){
             len = this.dataView.getUint32(this.offset,this.littleEndian);
             this.offset += 4;
@@ -123,7 +134,6 @@ class Parser {
         const key = tag.generateKey();
         this.tags[key] = tag;
         
-
         if(len === 0xFFFFFFFF && group === 0x7FE0 && element === 0x0010){
             let {group,element} = this.getNextGroupAndElement();
             while(true){

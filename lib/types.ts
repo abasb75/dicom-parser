@@ -57,6 +57,11 @@ interface DicomPixelModule{
     highBit:number|undefined,
     bitsStored:number|undefined,
     samplesPerPixel:number|undefined;
+    pixelDataProviderURL:any;
+    pixelPaddingRangeLimit:any;
+    extendedOffsetTable:any;
+    extendedOffsetTableLengths:any;
+    pixelAspectRatio:any;
 }
 
 interface DicomScalingModule {
@@ -88,5 +93,6 @@ export type {
 
     PixelArray,
     PixelDataDecodeOptions,
+    
 
 };
