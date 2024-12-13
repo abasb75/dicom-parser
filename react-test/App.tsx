@@ -3,9 +3,9 @@ import { ChangeEvent, Suspense, useEffect, useRef, useState, useTransition } fro
 //@ts-ignore
 import ReactJson from 'react-json-view';
 
-// import { loadAndParseFromFiles, loadAndParseFromUrl } from '@lib/index'; //devlop
+import { loadAndParseFromFiles, loadAndParseFromUrl } from '@lib/index'; //devlop
 // import { loadAndParseFromFiles, loadAndParseFromUrl } from '@package/index'; //test  package
-import { loadAndParseFromFiles, loadAndParseFromUrl } from '@package/index'; // test after deploy
+// import { loadAndParseFromFiles, loadAndParseFromUrl } from '@package/index'; // test after deploy
 
 
 

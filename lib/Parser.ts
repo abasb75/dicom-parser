@@ -50,7 +50,7 @@ class Parser {
 
 
     parse(){
-        this.getNextElement();
+        this.getElements();
         this.end = Date.now();
         this.dataSet = new Dataset(
             this.tags,
@@ -67,98 +67,97 @@ class Parser {
         return this.dataSet;
     }
 
-    getNextElement():void{
+    getElements():void{
 
-        if(this.offset >= this.arrayBuffer.byteLength){
-            return;
-        }
-        
-
-        const {group,element} = this.getNextGroupAndElement();
-        if(!group && !element){
-            return;
-        }
-
-        if(group === 0xFFFE && (element === 0xE0DD  || element === 0xE00D || element === 0xE000)){
-            this.offset += 4;
-            return this.getNextElement();
-        }
-
-        if(!this.implicit && group!==0x0002 && this.IMPLICT_TRANSFER_SYNTAXES.includes(this.transferSyntaxUID)){
-            this.implicit = true;
-        }
-
-        if(this.littleEndian && group!==0x0002 && this.BIG_ENDIAN_TRANSFER_SYNTAXES.includes(this.transferSyntaxUID)){
-            this.littleEndian = false;
-        }
-
-        if( !this.inflated && group!==0x0002 && this.DEFLATED_TRANSFER_SYNTAXES.includes(this.transferSyntaxUID)){
-            this.offset -= 4;
-            const meta = this.dataView.buffer.slice(0,this.offset);
-            const body = this.dataView.buffer.slice(this.offset);
-            const infaltedBody = pako.inflateRaw(body);
-            this.arrayBuffer = this.concatArrayBuffers(meta,infaltedBody);
-            this.dataView = new DataView(this.arrayBuffer);
-            this.inflated = true;
-            return this.getNextElement();
-        }
-
-        const vr = this.getNextVR(group,element);
-        let len=0;
-
-        if(this.implicit){
-            len = this.dataView.getUint32(this.offset,this.littleEndian);
-            this.offset += 4;
-        }
-        else if(this.EXEPTED.includes(vr)){
-            this.offset += 2; // skip 2 byte reserved
-            len = this.dataView.getUint32(this.offset,this.littleEndian);
-            this.offset += 4;
-        }else if(this.VRS.includes(vr)){
-            len = this.dataView.getUint16(this.offset,this.littleEndian);
-            this.offset += 2;
-        }else if((!vr || !vr.match(/^[A-Z]{2}$/)) && group===0x0002 && element===0x0000){
-            this.offset = 132;
-            this.tags = {};
-            this.implicit = true;
-            return this.getNextElement();
-        }else{
-            return;
-        }
-
-        if(group===0x0002 && element===0x0010){
-            this.transferSyntaxUID = (Value.getString(new Uint8Array(this.arrayBuffer,this.offset,len))).replace('\0', '');
-        }
-
-        const tag = new Tag(group,element,vr,len,this.offset);
-        const key = tag.generateKey();
-        this.tags[key] = tag;
-        
-        if(len === 0xFFFFFFFF && group === 0x7FE0 && element === 0x0010){
-            let {group,element} = this.getNextGroupAndElement();
-            while(true){
-                if(group === 0xFFFE && element === 0xE000){
-                    const len = this.dataView.getUint32(this.offset,this.littleEndian);
-                    this.offset +=4;
-                    const t = this.getNextGroupAndElement();
-                    group = t.group;
-                    element = t.element;
-                    this.offset += len;
-                }else{
-                    break;
-                }
+        while(true){
+            if(this.offset >= this.arrayBuffer.byteLength){
+                break;
             }
-            this.offset -= 4;
+
+            const {group,element} = this.getNextGroupAndElement();
+            if(!group && !element){
+                break;
+            }
+
+            if(group === 0xFFFE && (element === 0xE0DD  || element === 0xE00D || element === 0xE000)){
+                this.offset += 4;
+                continue;
+            }
+
+            if(!this.implicit && group!==0x0002 && this.IMPLICT_TRANSFER_SYNTAXES.includes(this.transferSyntaxUID)){
+                this.implicit = true;
+            }
+
+            if(this.littleEndian && group!==0x0002 && this.BIG_ENDIAN_TRANSFER_SYNTAXES.includes(this.transferSyntaxUID)){
+                this.littleEndian = false;
+            }
+
+            if( !this.inflated && group!==0x0002 && this.DEFLATED_TRANSFER_SYNTAXES.includes(this.transferSyntaxUID)){
+                this.offset -= 4;
+                const meta = this.dataView.buffer.slice(0,this.offset);
+                const body = this.dataView.buffer.slice(this.offset);
+                const infaltedBody = pako.inflateRaw(body);
+                this.arrayBuffer = this.concatArrayBuffers(meta,infaltedBody);
+                this.dataView = new DataView(this.arrayBuffer);
+                this.inflated = true;
+                return this.getElements();
+            }
+
+            const vr = this.getNextVR(group,element);
+            let len=0;
+    
+            if(this.implicit){
+                len = this.dataView.getUint32(this.offset,this.littleEndian);
+                this.offset += 4;
+            }
+            else if(this.EXEPTED.includes(vr)){
+                this.offset += 2; // skip 2 byte reserved
+                len = this.dataView.getUint32(this.offset,this.littleEndian);
+                this.offset += 4;
+            }else if(this.VRS.includes(vr)){
+                len = this.dataView.getUint16(this.offset,this.littleEndian);
+                this.offset += 2;
+            }else if((!vr || !vr.match(/^[A-Z]{2}$/)) && group===0x0002 && element===0x0000){
+                this.offset = 132;
+                this.tags = {};
+                this.implicit = true;
+                continue;
+            }else{
+                return;
+            }
+
+            if(group===0x0002 && element===0x0010){
+                this.transferSyntaxUID = (Value.getString(new Uint8Array(this.arrayBuffer,this.offset,len))).replace('\0', '');
+            }
+
+            console.log(group,element,vr,len);
+            const tag = new Tag(group,element,vr,len,this.offset);
+            const key = tag.generateKey();
+            this.tags[key] = tag;
             
-        }
+            if(len === 0xFFFFFFFF && group === 0x7FE0 && element === 0x0010){
+                let {group,element} = this.getNextGroupAndElement();
+                while(true){
+                    if(group === 0xFFFE && element === 0xE000){
+                        const len = this.dataView.getUint32(this.offset,this.littleEndian);
+                        this.offset +=4;
+                        const t = this.getNextGroupAndElement();
+                        group = t.group;
+                        element = t.element;
+                        this.offset += len;
+                    }else{
+                        break;
+                    }
+                }
+                this.offset -= 4;
+            }
+            
+            if(vr === "SQ" ){
+            }else{
+                this.offset += len;
+            }
         
-        if(vr === "SQ" ){
-            this.getNextElement();
-        }else{
-            this.offset += len;
-            this.getNextElement();
         }
-        
 
     }
 

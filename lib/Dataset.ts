@@ -179,7 +179,7 @@ class Dataset {
     }
 
     string(group:number,element:number):string{
-        return this.getValue(group,element) + "";
+        return this.getValue(group,element,'string') + "";
     }
 
     getValue(element:number|string,elementId?:number|string,vr?:string){

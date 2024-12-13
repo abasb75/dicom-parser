@@ -14,8 +14,6 @@ class PixelData {
             throw new Error(`Frame ${frame} not found.`);
         }
         return pixelDatas[frame];
-
-        
     }
 
     private static _getixelDataViews(dataset:Dataset):DataView[]{
@@ -48,7 +46,7 @@ class PixelData {
                         const dataView = new DataView(dataset.dataView.buffer.slice(offset,offset+len));
                         pixelDatas.push(dataView);
                     }else{
-                        offset -4;
+                        // offset -4;
                     }
                     offset += len;
                 }

@@ -41,6 +41,7 @@ export function loadAndParseFromFiles(file:File){
 }
 
 export function parse(dicomBuffer:ArrayBuffer){
+    console.log(dicomBuffer,dicomBuffer);
     const parser = new Parser(dicomBuffer);
     const dataset = parser.getDataset();
     return dataset;
