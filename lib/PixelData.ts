@@ -1,5 +1,4 @@
 import Dataset from "./Dataset";
-import Tag from "./Tag";
 
 class PixelData {
 
@@ -22,6 +21,7 @@ class PixelData {
         const numberOfFrames = dataset.pixelModule.numberOfFrames || 1;
         if(pixelData.valueLength === 0xFFFFFFFF){
             let offset = pixelData.offset;
+            let isBasic = true;
             while(true){
                 if(offset>=dataset.dataView.byteLength){
                     break;
@@ -36,20 +36,16 @@ class PixelData {
                 }else{
                    
                 }
-                console.log('group',Tag.intTo4digitString(group));
-                console.log('element',Tag.intTo4digitString(element));
+                
                 const len = dataset.dataView.getUint32(offset,dataset.littleEndian);
                 offset +=4;
-                if(len !== 0){
-                    console.log('element is 2',len)
-                    if(len>4){
-                        const dataView = new DataView(dataset.dataView.buffer.slice(offset,offset+len));
-                        pixelDatas.push(dataView);
-                    }else{
-                        // offset -4;
-                    }
-                    offset += len;
+                if(len !== 0 && !isBasic){
+                    const dataView = new DataView(dataset.dataView.buffer.slice(offset,offset+len));
+                    pixelDatas.push(dataView);
+                }else if(isBasic){
+                    isBasic=false;
                 }
+                offset += len;
             }
         }else{
             const frameLen = pixelData.valueLength/numberOfFrames;

@@ -130,7 +130,6 @@ class Parser {
                 this.transferSyntaxUID = (Value.getString(new Uint8Array(this.arrayBuffer,this.offset,len))).replace('\0', '');
             }
 
-            console.log(group,element,vr,len);
             const tag = new Tag(group,element,vr,len,this.offset);
             const key = tag.generateKey();
             this.tags[key] = tag;
