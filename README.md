@@ -69,4 +69,8 @@ const transferSyntaxUID = dataset.string(0x0002,0x0010);
 
 ...
 
+const framePixelData = dataset.getPixelData(0); // requested frame number
+
+...
+
 ```

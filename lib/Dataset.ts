@@ -32,6 +32,7 @@ class Dataset {
     rows:string|number|undefined;
     columns:string|number|undefined;
     patientSex:any;
+    basicOffsetTable:number[]|undefined;
 
     /** modules */
     voiLUTModule:DicomVOILutModule;

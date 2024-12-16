@@ -16,7 +16,7 @@
     "license": "ISC",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/abasb75/dicom-parser/raction.git"
+        "url": "https://github.com/abasb75/dicom-parser.git"
     },
     "bugs": {
         "url": "https://github.com/abasb75/dicom-parser/issues"
