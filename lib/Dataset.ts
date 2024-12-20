@@ -1,8 +1,9 @@
 
-import PixelData from "./PixelData";
+import PixelData from "./utils/PixelData";
 import Tag from "./Tag";
 import Value from "./Value";
 import { DicomDate, DicomPatientModule, DicomPixelModule, DicomScalingModule, DicomTime, DicomVOILutModule, Tags } from "./types";
+import PaletteColor from "./utils/PaletteColor";
 
 class Dataset {
     
@@ -19,19 +20,11 @@ class Dataset {
     seriesNumber:number|string|undefined;
     studyDate:string|DicomDate;
     studyTime:number|DicomTime|string|undefined;
-    pixelRepresentation:number|string|undefined;
     littleEndian:boolean;
-    pixeSpacing:number|number[]|string|undefined;
     accessionNumber:string;
-    bitsAllocated:number|string|undefined;
-    bitsStored:number|string|undefined;
-    highBit:number|string|undefined;
     imageType:number|string|number[]|string[]|undefined;	
     modality:number|string|number[]|string[]|undefined;	
-    seriesDescription:string
-    rows:string|number|undefined;
-    columns:string|number|undefined;
-    patientSex:any;
+    seriesDescription:string;
     basicOffsetTable:number[]|undefined;
 
     /** modules */
@@ -54,7 +47,6 @@ class Dataset {
         this.imageType = this.get(0x0008,0x0008);
         this.modality = this.get(0x0008,0x0060);
         this.seriesDescription = this.string(0x0008,0x103E);
-        this.patientSex = this.get(0x0010,0x0040);
         this.voiLUTModule = this.getVOILutModule();
         this.patientModule = this.getPatientModule();
         this.pixelModule = this.getPixelModule();
@@ -123,7 +115,20 @@ class Dataset {
             pixelPaddingRangeLimit:this.get(0x0028,0x0121),
             extendedOffsetTable:this.get(0x7FE0,0x0001),
             extendedOffsetTableLengths:this.get(0x7FE0,0x0002),
-            pixelAspectRatio:this.get(0x0028,0x0034)
+            pixelAspectRatio:this.get(0x0028,0x0034),
+            planarConfiguration:this.int(0x0028,0x0006),
+            redPaletteColorLookupTableDescriptor:this.get(0x0028,0x1101),
+            greenPaletteColorLookupTableDescriptor:this.get(0x0028,0x1102),
+            bluePaletteColorLookupTableDescriptor:this.get(0x0028,0x1103),
+            alphaPaletteColorLookupTableDescriptor:this.get(0x0028,0x1104),
+            redPaletteColorLookupTableData:this.get(0x0028,0x1201),
+            greenPaletteColorLookupTableData:this.get(0x0028,0x1202),
+            bluePaletteColorLookupTableData:this.get(0x0028,0x1203),
+            alphaPaletteColorLookupTableData:this.get(0x0028,0x1204),
+            segmentedRedPaletteColorLookupTableData:this.get(0x0028,0x1221),
+            segmentedGreenPaletteColorLookupTableData:this.get(0x0028,0x1222),
+            segmentedBluePaletteColorLookupTableData:this.get(0x0028,0x1223),
+            segmentedAlphaPaletteColorLookupTableData:this.get(0x0028,0x1224),
         }
     }
 
@@ -215,6 +220,10 @@ class Dataset {
 
     }
 
+    getPaletteColorData(){
+        return PaletteColor.get(this);
+    }
+
     private _getValue(tag:Tag,vr:string="AA"){
         const offset = tag.offset;
         if(!offset) return "";
@@ -231,6 +240,7 @@ class Dataset {
         }
         return Tag.intTo4digitString(input);
     }
+
     
 }
 

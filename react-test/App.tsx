@@ -52,9 +52,6 @@ function App() {
     if (event.target.files && event.target.files[0] ) {
       const dcmFile = event.target.files[0];
       loadAndParseFromFiles(dcmFile).then((dataset)=>{
-          // if(dataset && canvasRef.current){
-          //   // dataset.draw(canvasRef.current);
-          // }
           startTransition(()=>{
             setDcmData(dataset);
             setErrorMessage("");
@@ -68,7 +65,6 @@ function App() {
   }
   useEffect(()=>{
     console.log("dcm dataset",dcmData);
-    
   },[dcmData]);
 
 

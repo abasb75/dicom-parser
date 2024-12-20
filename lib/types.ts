@@ -62,6 +62,19 @@ interface DicomPixelModule{
     extendedOffsetTable:any;
     extendedOffsetTableLengths:any;
     pixelAspectRatio:any;
+    planarConfiguration:number|undefined;
+    redPaletteColorLookupTableDescriptor:unknown;
+    greenPaletteColorLookupTableDescriptor:unknown;
+    bluePaletteColorLookupTableDescriptor:unknown;
+    alphaPaletteColorLookupTableDescriptor:unknown;
+    redPaletteColorLookupTableData:any;
+    greenPaletteColorLookupTableData:any;
+    bluePaletteColorLookupTableData:any;
+    alphaPaletteColorLookupTableData:any;
+    segmentedRedPaletteColorLookupTableData:any;
+    segmentedGreenPaletteColorLookupTableData:any;
+    segmentedBluePaletteColorLookupTableData:any;
+    segmentedAlphaPaletteColorLookupTableData:any;
 }
 
 interface DicomScalingModule {
@@ -78,6 +91,19 @@ interface PixelDataDecodeOptions {
     dataset?:Dataset;
 }
 
+interface PaletteColorDataColor {
+    data:number[],
+    firstInputValueMapped:number,
+    lutEntries:number,
+    bitsPerEntry:number,
+}
+
+interface PaletteColorData {
+    red:PaletteColorDataColor|undefined,
+    green:PaletteColorDataColor|undefined,
+    blue:PaletteColorDataColor|undefined,
+    alpha:PaletteColorDataColor|undefined,
+}
 
 export type {
     Tags,
@@ -93,6 +119,9 @@ export type {
 
     PixelArray,
     PixelDataDecodeOptions,
+
+    PaletteColorData,
+    PaletteColorDataColor,
     
 
 };

@@ -15,7 +15,7 @@ class Parser {
     private dataView:DataView;
     private tags:Tags = {};
     private dataSet:Dataset|undefined;
-    private EXEPTED = ["OB", "OW", "SQ", "UN","UT","OF","UC"];
+    private EXEPTED = ["OB", "OW", "SQ", "UN","UT","OF","UC","OD"];
     private VRS = ["AE", "AS", "AT", "CS", "DA", "DS", "DT", "FL", "FD", "IS", "LO", "LT", "OB", "OD", "OF", "OW", "PN", "SH", "SL", "SS", "ST", "TM", "UI", "UL", "UN", "US", "UT", "UC"];
     private IMPLICT_TRANSFER_SYNTAXES = ["1.2.840.10008.1.2"];
     private BIG_ENDIAN_TRANSFER_SYNTAXES = ["1.2.840.10008.1.2.2"];
@@ -38,19 +38,24 @@ class Parser {
         }
 
         const prefix =Value.getString(new Uint8Array(arrayBuffer,128,4));
-        if(prefix !== 'DICM'){
-            return;
+
+        if(prefix === 'DICM'){
+            this.offset = 132;
+        }else{
+            // in some image (128 empty byte and DICM) does not exist.
+            // const {group} = this.getNextGroupAndElement();
+            // if(group!==0x0002){
+            //     return;
+            // }
+            this.offset = 0;
         }
-
-        this.offset = 132;
-
         this.parse();
         
     }
 
 
     parse(){
-        this.getElements();
+        this.tags = this.getElements();
         this.end = Date.now();
         this.dataSet = new Dataset(
             this.tags,
@@ -67,18 +72,23 @@ class Parser {
         return this.dataSet;
     }
 
-    getElements():void{
+    getElements(sqLen?:number):Tags{
+        const tags:Tags = {};
+        const targetOfset = (sqLen!==undefined) 
+            ? (this.offset+sqLen) : this.arrayBuffer.byteLength;
 
-        while(true){
-            if(this.offset >= this.arrayBuffer.byteLength){
-                break;
-            }
+        while(this.offset < targetOfset){
 
             const {group,element} = this.getNextGroupAndElement();
+            
             if(!group && !element){
                 break;
             }
 
+            if(sqLen && group === 0xFFFE && (element === 0xE00D || element === 0xE0DD)){
+                this.offset +=4;
+                return tags;
+            }
             if(group === 0xFFFE && (element === 0xE0DD  || element === 0xE00D || element === 0xE000)){
                 this.offset += 4;
                 continue;
@@ -123,16 +133,17 @@ class Parser {
                 this.implicit = true;
                 continue;
             }else{
-                return;
+                this.offset -= 6;
+                this.implicit = true;
+                continue;
             }
-
+            
             if(group===0x0002 && element===0x0010){
                 this.transferSyntaxUID = (Value.getString(new Uint8Array(this.arrayBuffer,this.offset,len))).replace('\0', '');
             }
 
             const tag = new Tag(group,element,vr,len,this.offset);
-            const key = tag.generateKey();
-            this.tags[key] = tag;
+            
             
             if(len === 0xFFFFFFFF && group === 0x7FE0 && element === 0x0010){
                 let {group,element} = this.getNextGroupAndElement();
@@ -152,11 +163,15 @@ class Parser {
             }
             
             if(vr === "SQ" ){
+                tag.value = this.getElements(len);
             }else{
                 this.offset += len;
             }
+            const key = tag.generateKey();
+            tags[key] = tag;
         
         }
+        return tags;
 
     }
 

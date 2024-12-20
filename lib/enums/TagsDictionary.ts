@@ -3611,7 +3611,9 @@ const TagsDictionaryEnums:TagsDictionaryEnumsType = {
         "1069" : ["FL", "TotalProcessingTime"],
         "106C" : ["OB", "DetectorCalibrationData"]
     },
-    "7FE0" : {
+    "7FE0" :{
+        "0008" : ["OF", "FloatPixelData"],
+        "0009" : ["OD", "DoublePixelData"],
         "0010" : ["OB", "PixelData"],
     }
 };

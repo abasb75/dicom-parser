@@ -1,5 +1,5 @@
-import Dataset from "./Dataset";
-import Tag from "./Tag";
+import Dataset from "../Dataset";
+import Tag from "../Tag";
 
 
 interface Fragment {
@@ -8,17 +8,6 @@ interface Fragment {
 }
 
 class PixelData {
-    
-    // static MAGICS = [
-    //     // JPEG
-    //     [0xFF,0xD8,0xFF,0xE0],
-    //     // JPEG 2000
-    //     [0x00,0x00,0x00,0x0C,0x6A,0x50,0x20,0x20,0x0D,0x0A,0x87,0x0A],
-    //     [0xFF,0x4F,0xFF,0x51],
-
-    //     // JPEG-LS
-    //     []
-    // ]
 
     static async get(dataset:Dataset,frame:number=0){
         const pixelData = PixelData._getixelDataViews(dataset,frame);
@@ -27,6 +16,9 @@ class PixelData {
 
     private static _getixelDataViews(dataset:Dataset,frameIndex:number):DataView{
         const pixelDataElement = dataset.tags['0x7FE00010'] || dataset.tags['0x7FE00008'] || dataset.tags['0x7FE00009'];
+        if(!pixelDataElement){
+            throw new Error("dicom has not pixels");
+        }
         
         const numberOfFrames = dataset.pixelModule.numberOfFrames || 1;
         if(pixelDataElement.valueLength === 0xFFFFFFFF){
@@ -202,7 +194,7 @@ class PixelData {
         const dataView = dataset.dataView;
         while(true){
             console.log(offset,dataView.byteLength)
-            if(offset>=dataView.byteLength+8){
+            if(offset>=dataView.byteLength){
                 break;
             }
             const group = dataset.dataView.getUint16(offset,dataset.littleEndian) as number;

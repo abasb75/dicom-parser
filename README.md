@@ -74,3 +74,15 @@ const framePixelData = dataset.getPixelData(0); // requested frame number
 ...
 
 ```
+
+6. get `palette color` map for `PALETTE COLOR` photometricInterpretation:
+
+```js
+const paletteDataMap = dataset.getPaletteColorData();
+
+if(paletteDataMap){
+  // apply palette color to pixels
+  ...
+}
+
+````
