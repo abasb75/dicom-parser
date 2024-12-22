@@ -98,7 +98,6 @@ class Value{
     static US(dataView:DataView,offset:number,len:number,littleEndian:boolean=true){
         if(len === 2){
             const value = dataView.getUint16(offset,littleEndian);
-            console.log({littleEndian,value,v:dataView.getUint16(offset+2,littleEndian)});
             return value;
         }else if(len>2){
             const values = [];

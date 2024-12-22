@@ -12,6 +12,7 @@ class Parser {
 
     private arrayBuffer;
     private offset:number;
+    private startOfset:number = 132;
     private dataView:DataView;
     private tags:Tags = {};
     private dataSet:Dataset|undefined;
@@ -39,15 +40,15 @@ class Parser {
 
         const prefix =Value.getString(new Uint8Array(arrayBuffer,128,4));
 
+
         if(prefix === 'DICM'){
             this.offset = 132;
         }else{
-            // in some image (128 empty byte and DICM) does not exist.
-            // const {group} = this.getNextGroupAndElement();
-            // if(group!==0x0002){
-            //     return;
-            // }
             this.offset = 0;
+            while(Value.getString(this.dataView.buffer.slice(this.offset,this.offset+1))===""){
+                this.offset++;
+            }
+            this.startOfset = this.offset;
         }
         this.parse();
         
@@ -98,7 +99,10 @@ class Parser {
                 this.implicit = true;
             }
 
-            if(this.littleEndian && group!==0x0002 && this.BIG_ENDIAN_TRANSFER_SYNTAXES.includes(this.transferSyntaxUID)){
+            if(
+                this.littleEndian && group!==0x0002 
+                && this.BIG_ENDIAN_TRANSFER_SYNTAXES.includes(this.transferSyntaxUID)
+            ){
                 this.littleEndian = false;
             }
 
@@ -128,7 +132,7 @@ class Parser {
                 len = this.dataView.getUint16(this.offset,this.littleEndian);
                 this.offset += 2;
             }else if((!vr || !vr.match(/^[A-Z]{2}$/)) && group===0x0002 && element===0x0000){
-                this.offset = 132;
+                this.offset = this.startOfset;
                 this.tags = {};
                 this.implicit = true;
                 continue;
@@ -141,6 +145,21 @@ class Parser {
             if(group===0x0002 && element===0x0010){
                 this.transferSyntaxUID = (Value.getString(new Uint8Array(this.arrayBuffer,this.offset,len))).replace('\0', '');
             }
+
+            // find dataset thats may be as big endian dicom.
+            // if(
+            //     this.littleEndian
+            //     && Object.keys(tags)?.length===0 
+            //     && len > this.dataView.byteLength
+            // ){
+            //     console.log({group,element,len,vr});
+            //     this.littleEndian =false;
+            //     this.offset = this.startOfset;
+            //     return this.getElements();
+            // }else{
+            //     console.log({group,element,len,vr});
+            //     return tags;
+            // }
 
             const tag = new Tag(group,element,vr,len,this.offset);
             

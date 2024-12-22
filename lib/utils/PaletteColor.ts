@@ -38,7 +38,6 @@ class PaletteColor {
             redPaletteColorLookupTableDescriptor as number[]|undefined,
             redPaletteColorLookupTableData,
             segmentedRedPaletteColorLookupTableData,
-            bitsAllocated,
             littleEndian,
         );
 
@@ -46,7 +45,6 @@ class PaletteColor {
             greenPaletteColorLookupTableDescriptor as number[]|undefined,
             greenPaletteColorLookupTableData,
             segmentedGreenPaletteColorLookupTableData,
-            bitsAllocated,
             littleEndian,
 
         );
@@ -54,14 +52,12 @@ class PaletteColor {
             bluePaletteColorLookupTableDescriptor as number[]|undefined,
             bluePaletteColorLookupTableData,
             segmentedBluePaletteColorLookupTableData,
-            bitsAllocated,
             littleEndian
         );
         const alpha = PaletteColor.getData(
             alphaPaletteColorLookupTableDescriptor as number[]|undefined,
             alphaPaletteColorLookupTableData,
             segmentedAlphaPaletteColorLookupTableData,
-            bitsAllocated,
             littleEndian,
         );
 
@@ -79,7 +75,6 @@ class PaletteColor {
         descriptor:number[]|undefined,
         paletteData:DataView|undefined,
         segmentedPaletteData:DataView|undefined,
-        bitsAllocated:number,
         littleEndian:boolean,
     ):PaletteColorDataColor|undefined{
         
@@ -101,11 +96,11 @@ class PaletteColor {
 
         if(paletteData){
             tableDataArray = bitsPerEntry===16 
-            ? PaletteColor.get16Array(paletteData,bitsAllocated,littleEndian) 
+            ? PaletteColor.get16Array(paletteData,littleEndian) 
             : PaletteColor.get8Array(paletteData);
         }else if(segmentedPaletteData){
             const segmentedTableDataArray = bitsPerEntry===16 
-            ? PaletteColor.get16Array(segmentedPaletteData,bitsAllocated,littleEndian) 
+            ? PaletteColor.get16Array(segmentedPaletteData,littleEndian) 
             : PaletteColor.get8Array(segmentedPaletteData);
             tableDataArray = PaletteColor.segmentedDataToData(segmentedTableDataArray,lutEntries)?.tableData;
             
@@ -119,23 +114,18 @@ class PaletteColor {
             data:tableDataArray,
             firstInputValueMapped,
             lutEntries,
-            bitsPerEntry
+            bitsPerEntry,
+            littleEndian,
         }
     }
 
     private static get16Array(
         paletteData:DataView,
-        bitsAllocated:number,
         littleEndian:boolean
     ){
         const array:number[] = [];
         for(let i=0;i<paletteData.byteLength;i+=2){
-            if(bitsAllocated === 8){
-                array.push(paletteData.getUint16(i,littleEndian) >> 8);
-            }else{
-                array.push(paletteData.getUint16(i,littleEndian));
-            }
-            
+            array.push(paletteData.getUint16(i,littleEndian));
         }
         return array;
     }
@@ -178,7 +168,7 @@ class PaletteColor {
                         segmentedDataOffset++;
                         tableDataOffset++;
                     }
-                    lastValue = tableData[segmentedDataOffset-1] & 0xFFFF;
+                    lastValue = tableData[segmentedDataOffset-1] & 0xffff;
                     break;
                 case 1:
                     if(typeof lastValue !== "number"){
@@ -190,7 +180,7 @@ class PaletteColor {
                         tableData [tableDataOffset] = (lastValue + ((newValue - lastValue) / len));
                         tableDataOffset++;
                     }
-                    lastValue = newValue & 0xFFFF;
+                    lastValue = newValue & 0xffff;
                     break;
                 case 2: // untested
                     if(typeof lastValue !== "number"){

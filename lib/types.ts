@@ -92,10 +92,11 @@ interface PixelDataDecodeOptions {
 }
 
 interface PaletteColorDataColor {
-    data:number[],
+    data:Uint8Array[]|Uint16Array[],
     firstInputValueMapped:number,
     lutEntries:number,
     bitsPerEntry:number,
+    littleEndian:boolean,
 }
 
 interface PaletteColorData {

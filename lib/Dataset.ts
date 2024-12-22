@@ -7,6 +7,9 @@ import PaletteColor from "./utils/PaletteColor";
 
 class Dataset {
     
+    static Float = "Float";
+    static Integer = "Integer";
+
     /** duration of parse */
     start:number;
     end:number|undefined;
@@ -64,6 +67,18 @@ class Dataset {
             return true;
         }
         return false;
+    }
+
+    getPixelTypes(){
+        if(
+            this.tags['0x7FE00008'] 
+            || this.tags['0x7FE00009']
+        ){
+            return Dataset.Float;
+        }else if(this.tags['0x7FE00010'] ){
+            return  Dataset.Integer;
+        }
+        return null;
     }
 
     async getPixelData(frame:number=0){
@@ -240,6 +255,7 @@ class Dataset {
         }
         return Tag.intTo4digitString(input);
     }
+
 
     
 }

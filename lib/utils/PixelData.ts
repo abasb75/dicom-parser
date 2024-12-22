@@ -24,11 +24,20 @@ class PixelData {
         if(pixelDataElement.valueLength === 0xFFFFFFFF){
             return PixelData._encapsulatePixelDatas(dataset,pixelDataElement,frameIndex);
         }else{
-            const frameLen = pixelDataElement.valueLength/numberOfFrames;
+            const { columns,rows,samplesPerPixel,bitsAllocated } = dataset?.pixelModule;
+            let frameLen = 0;
+            if(dataset.pixelModule?.numberOfFrames){
+                frameLen = pixelDataElement.valueLength/numberOfFrames;
+            }else if(columns && rows && samplesPerPixel && bitsAllocated){
+                const bytesAllocated = PixelData.bitToByte(bitsAllocated);
+                frameLen = rows * columns * bytesAllocated * samplesPerPixel;
+            }else{
+                frameLen = pixelDataElement.valueLength/numberOfFrames;
+            }
+            frameLen = Math.min(frameLen,pixelDataElement.valueLength);
             const offset = pixelDataElement.offset + (frameLen * frameIndex);
             return new DataView(dataset.dataView.buffer.slice(offset,offset+frameLen))
         }
-
     }
 
     private static _encapsulatePixelDatas(dataset:Dataset,pixelDataElement:Tag,frameIndex:number){
@@ -99,7 +108,6 @@ class PixelData {
         const basicOffsetTable = [];
         const basicOffsetIndex = offset + len;
 
-        
         if(len > 0){
             for(let i=0; i<len; i+=4){
                 basicOffsetTable.push(
@@ -145,7 +153,6 @@ class PixelData {
                 || PixelData._isJPEG2000(fragment.offset+8,dataset.dataView) 
             ){
                 basicOffsetTable.push(fragment.offset);
-                console.log('magics is jpeg/jpeg2000');
             }
         }
         return basicOffsetTable;
@@ -163,10 +170,8 @@ class PixelData {
     private static _isJPEG2000(position:number,dataView:DataView) {
 
         const magics2 = [0xFF,0x4F,0xFF,0x51];
-        console.log('magics2',magics2);
         for(let i=0;i<magics2.length;i++){
             const finded = dataView.getUint8(position+i);
-            console.log(finded);
             if(finded !== magics2[i]){
                 break;
             }else if(i===magics2.length-1){
@@ -193,7 +198,6 @@ class PixelData {
         let offset = basicOffsetIndex;
         const dataView = dataset.dataView;
         while(true){
-            console.log(offset,dataView.byteLength)
             if(offset>=dataView.byteLength){
                 break;
             }
@@ -216,6 +220,12 @@ class PixelData {
         return fragments;
     }
 
+    private static bitToByte(bit:number){
+        if(bit <= 8){
+            return bit/8;
+        }
+        return Math.ceil(bit/8);
+    }
    
 
 
