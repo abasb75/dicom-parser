@@ -148,7 +148,7 @@ class Value{
         const buffer = dataView.buffer.slice(offset,offset+len);
         return new DataView(buffer);
     }
-
+    
     static getString(bytes:Uint8Array|Int8Array|ArrayBuffer){
         const decoder = new TextDecoder();
         return decoder.decode(bytes).trim();

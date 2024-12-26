@@ -115,11 +115,13 @@ class Dataset {
     }
 
     getPixelModule():DicomPixelModule{
+        const pixelMeasuresSequence = this.get(0x0028,0x9110);
         return {
+            pixelMeasuresSequence,
             photometricInterpretation:this.get(0x0028,0x0004),
             numberOfFrames:this.int(0x0028,0x0008),
             pixelRepresentation : this.int(0x0028,0x0103),
-            pixeSpacing:this.get(0x0028,0x0030),
+            pixelSpacing:this.getPixelSpacing(),
             rows:this.int(0x0028,0x0010),
             columns:this.int(0x0028,0x0011),
             bitsAllocated:this.int(0x0028,0x0100),
@@ -145,6 +147,36 @@ class Dataset {
             segmentedBluePaletteColorLookupTableData:this.get(0x0028,0x1223),
             segmentedAlphaPaletteColorLookupTableData:this.get(0x0028,0x1224),
         }
+    }
+
+    // TODO: need to add more login to advance
+    getPixelSpacing(){
+        const pixelSpacing = this.get(0x0028,0x0030);
+        if(pixelSpacing) return pixelSpacing;
+
+        const sharedFunctionalGroupsSequence = this.tags["0x52009229"];
+        console.log({sharedFunctionalGroupsSequence})
+        if(
+            sharedFunctionalGroupsSequence
+            && sharedFunctionalGroupsSequence.vr === "SQ"
+            && typeof sharedFunctionalGroupsSequence.value
+        ){
+            const pixelSpacing = this._findTagsByKey(
+                '0x00280030',
+                sharedFunctionalGroupsSequence.value as Tags,
+                1024
+            );
+            if(pixelSpacing){
+                return Value.byVr(
+                    this.dataView,
+                    pixelSpacing.offset,
+                    pixelSpacing.valueLength,
+                    pixelSpacing.vr,
+                    this.littleEndian
+                );
+            }
+        }
+
     }
 
     getScalingModule():DicomScalingModule{
@@ -195,7 +227,7 @@ class Dataset {
     }
 
     get(group:number,element:number){
-        const value = this.getValue(group,element) as string;
+        const value = this.getValue(group,element) as any;
         return value;
     }
 
@@ -227,16 +259,47 @@ class Dataset {
         }
 
         const key = `0x${_group}${_element}`;
-        if(!this.tags[key]){
+        const tag = this._findTagsByKey(key,this.tags);
+        if(!tag){
             return "";
         }
-        const _vr = vr || this.tags[key]?.vr || Tag.getTagVRFromDictionary(_group,_element) || "AA";
-        return this._getValue(this.tags[key],_vr);
+        const _vr = vr || tag?.vr || Tag.getTagVRFromDictionary(_group,_element) || "AA";
+        if(_vr === "SQ"){
+            return tag.value;
+        }
+        return this._getValue(tag,_vr);
 
     }
 
     getPaletteColorData(){
         return PaletteColor.get(this);
+    }
+
+    private _findTagsByKey(key:string,tags:Tags,depth:number=1){
+        if(tags[key]){
+            return tags[key];
+        }
+
+        if(depth === 1){
+            return null;
+        }
+
+        const keys = Object.keys(tags);
+        const sqs:Tags[] = [];
+
+        keys.forEach(key=>{
+            if(tags[key].vr === 'SQ' && typeof tags[key].value === "object"){
+                sqs.push(tags[key].value as Tags);
+            }
+        });
+        for(let i=0;i<sqs.length;i++){
+            const finded:any = this._findTagsByKey(key,sqs[i],depth-1);
+            if(finded) {
+                return finded;
+            }
+        }
+
+        return null;
     }
 
     private _getValue(tag:Tag,vr:string="AA"){
@@ -247,6 +310,41 @@ class Dataset {
         tag.value = value;
         return value;
     }
+
+    // private _getSqValues(key:string){
+    //     const sqValues:object = {};
+    //     const values = this.tags[key]?.value as Tags;
+    //     console.log({values})
+    //     if(!values) return {};
+    //     const keys = Object.keys(values as object);
+    //     if(!keys || !Array.isArray(keys) || keys.length<1){
+    //         return {};
+    //     }
+    //     keys.forEach((key:string)=>{
+    //         //@ts-ignore
+    //         if(typeof values[key] === "object"){
+    //             const name = (values[key])?.name as string;
+    //             if(typeof name === "string" && name.length>0){
+    //                 const offset = (values[key])?.offset;
+    //                 const vr = (values[key])?.vr;
+    //                 const len = (values[key])?.valueLength;
+
+    //                 //@ts-ignore
+    //                 sqValues[name] = Value.byVr(
+    //                     this.dataView,
+    //                     offset,
+    //                     len,
+    //                     vr,
+    //                     this.littleEndian
+    //                 );
+
+    //             }
+    //         }
+            
+           
+    //     })
+
+    // }
 
     private _reformatToString(input:number|string|undefined):string{
         if(!input) return "";

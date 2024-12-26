@@ -50,7 +50,7 @@ interface DicomPixelModule{
     photometricInterpretation:string,
     numberOfFrames:number|undefined,
     pixelRepresentation:number|undefined,
-    pixeSpacing:any|undefined,
+    pixelSpacing:any|undefined,
     rows:number|number|undefined,
     columns:number|number|undefined,
     bitsAllocated:number|undefined,
@@ -75,6 +75,7 @@ interface DicomPixelModule{
     segmentedGreenPaletteColorLookupTableData:any;
     segmentedBluePaletteColorLookupTableData:any;
     segmentedAlphaPaletteColorLookupTableData:any;
+    pixelMeasuresSequence:any;
 }
 
 interface DicomScalingModule {

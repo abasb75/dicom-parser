@@ -38,7 +38,7 @@ class Parser {
             return;
         }
 
-        const prefix =Value.getString(new Uint8Array(arrayBuffer,128,4));
+        const prefix = Value.getString(new Uint8Array(arrayBuffer,128,4));
 
 
         if(prefix === 'DICM'){
