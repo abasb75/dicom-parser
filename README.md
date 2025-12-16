@@ -1,81 +1,44 @@
-# @abasb75/dicom-parser
+# DICOM Parser
 
-```sh
-npm i @abasb75/dicom-parser pako --save
-npm i @types/pako --save-dev
+A lightweight and simple DICOM parser designed for browser and Node.js environments.  
+This library extracts metadata and pixel information from raw DICOM files using a clean and intuitive API.
+
+---
+
+## 📦 Installation
+
+```bash
+npm install @abasb75/dicom-parser
 ```
 
-# Demo
+## 🚀 Usage
 
-<a href="https://abasb75.github.io/dicom-parser/">demo link</a>
+To use this library, you must provide the ArrayBuffer of a DICOM file.
 
-# Usage
+```js
+import { parse } from '@abasb75/dicom-parser';
 
-1. For Download dicom and parse from url:
+const dataset = parse(dicomBuffer as ArrayBuffer);
 
-```javascript
-import { loadAndParseFromUrl } from "@abasb75/dicom-parser";
-
-...
-const url = "....dcm";
-loadAndParseFromUrl(url)
-.then(dataset=>{
-  console.log(dataset);
-})
-.catch(err=>{
-  console.log(error);
-})
-
+console.log({ dataset });
 ```
 
+## Get Value
 
-2. For parse dataset from local files:
+```js
 
-```javascript
-import { loadAndParseFromFiles } from "@abasb75/dicom-parser";
-
-...
-
-loadAndParseFromFiles(file)
-.then(dataset=>{
-  console.log(dataset);
-})
-.catch(err=>{
-  console.log(error);
-});
+const metadata = dataset.metadata;
+const someTag = dataset.get(0xXXXX,0xXXXX);
 
 ```
 
-3. For parsing arrayBuffer:
+## Pixel Data
 
-```javascript
-import { parse } from "@abasb75/dicom-parser";
-
-...
-
-const dataset = parse(arrayBuffer);
-
+```js
+const pixelData = dataset.getPixelData(frameIndex=0);
 ```
 
-
-4. Getting value for dicom tag
-
-```javascript
-
-...
-
-const transferSyntaxUID = dataset.get(0x0002,0x0010);
-const transferSyntaxUID = dataset.string(0x0002,0x0010);
-
-...
-
-const framePixelData = dataset.getPixelData(0); // requested frame number
-
-...
-
-```
-
-6. get `palette color` map for `PALETTE COLOR` photometricInterpretation:
+## Pallete Color Data
 
 ```js
 const paletteDataMap = dataset.getPaletteColorData();
@@ -86,3 +49,5 @@ if(paletteDataMap){
 }
 
 ````
+
+
