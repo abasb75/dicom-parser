@@ -11,6 +11,10 @@ This library extracts metadata and pixel information from raw DICOM files using 
 npm install @abasb75/dicom-parser
 ```
 
+## Demo
+
+https://abasb75.github.io/dicom-parser/
+
 ## 🚀 Usage
 
 To use this library, you must provide the ArrayBuffer of a DICOM file.
